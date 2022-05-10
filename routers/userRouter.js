@@ -1,17 +1,16 @@
 const userCtrl = require("../controllers/userCtrl");
-const auth = require("./auth");
 const authToken = require("./auth");
 
-const router = require("express").Router();
+const userRouter = require("express").Router();
 
-router.route("/api/v1/users").get(authToken, (req, res) => {
+userRouter.route("/api/v1/users").get(authToken, (req, res) => {
   res.send("User test is successful");
 });
 
-router.route("/api/v1/users/register").post(userCtrl.register);
-router.route("/api/v1/users/login").post(userCtrl.login);
-router.route("/api/v1/users/logout").post(userCtrl.logout);
+userRouter.route("/api/v1/users/register").post(userCtrl.register);
+userRouter.route("/api/v1/users/login").post(userCtrl.login);
+userRouter.route("/api/v1/users/logout").post(userCtrl.logout);
 
-router.route("/api/v1/users/getUser").get(authToken, userCtrl.getUser);
+userRouter.route("/api/v1/users/getUser").get(authToken, userCtrl.getUser);
 
-module.exports = router;
+module.exports = userRouter;
