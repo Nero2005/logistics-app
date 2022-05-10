@@ -2,7 +2,12 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
-const router = require("./routers/userRouter");
+const path = require("path");
+const helmet = require("helmet");
+const logger = require("morgan");
+const cors = require("cors");
+const userRouter = require("./routers/userRouter");
+const otpRouter = require("./routers/otpRouter");
 const app = express();
 
 const dbConnection = async () => {
@@ -14,15 +19,22 @@ const dbConnection = async () => {
   }
 };
 
+let corsOption = {
+  origin: "*",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
+  exposedHeaders: ["x-auth-token"],
+};
+
 app.use(express.json());
 app.use(cookieParser());
-app.use(router);
+app.use(cors(corsOption));
+app.use(helmet());
+app.use(logger("common"));
+app.use(userRouter);
+app.use(otpRouter);
 
 const PORT = 5000 || process.env.PORT;
-
-// app.get("/api/v1/users/", (req, res, next) => {
-//   res.json({ msg: "Hello World!" });
-// });
 
 app.listen(PORT, () => {
   dbConnection();

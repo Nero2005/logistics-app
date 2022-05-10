@@ -67,8 +67,11 @@ const userCtrl = {
     res.json("Successfully logged out");
   },
   getUser: async (req, res) => {
-    const foundUser = await User.findById(req.user.id);
-    if (!foundUser) res.status(404).json("User not found!");
+    let foundUser;
+    if (req.user) {
+      foundUser = await User.findById(req.user.id);
+    }
+    if (!foundUser) return res.status(404).json("User not found!");
     const { password, createdAt, updatedAt, ...others } = foundUser._doc;
     console.log(others);
     res.status(200).json(others);
