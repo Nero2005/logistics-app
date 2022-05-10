@@ -84,7 +84,7 @@ const otpCtrl = {
         specialChars: false,
       });
       const now = new Date();
-      const expiration_time = AddMinutesToDate(now, 10);
+      const expiration_time = AddMinutesToDate(now, 5);
 
       const newOTP = new OTP({
         otp: otp,
@@ -207,7 +207,7 @@ const otpCtrl = {
         specialChars: false,
       });
       const now = new Date();
-      const expiration_time = AddMinutesToDate(now, 10);
+      const expiration_time = AddMinutesToDate(now, 5);
 
       const newOTP = new OTP({
         otp: otp,
