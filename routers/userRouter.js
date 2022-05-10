@@ -12,4 +12,6 @@ router.route("/api/v1/users/register").post(userCtrl.register);
 router.route("/api/v1/users/login").post(userCtrl.login);
 router.route("/api/v1/users/logout").post(userCtrl.logout);
 
+router.route("/api/v1/users/getUser").get(authToken, userCtrl.getUser);
+
 module.exports = router;
