@@ -16,7 +16,19 @@ const userCtrl = {
 
     try {
       const savedUser = await newUser.save();
-      res.status(201).json(savedUser);
+      const accessToken = jwt.sign(
+        {
+          id: savedUser._id,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "3d" }
+      );
+      res.cookie("userToken", accessToken, {
+        maxAge: 3 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      });
+      const { password, ...others } = savedUser._doc;
+      res.status(201).json({ ...others, accessToken });
     } catch (e) {
       console.log(e);
       res.status(500).json(e);
@@ -31,13 +43,28 @@ const userCtrl = {
         process.env.SECRET_PASSPHRASE
       );
       const psw = hashedPassword.toString(CryptoJS.enc.Utf8);
+      const accessToken = jwt.sign(
+        {
+          id: user._id,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "3d" }
+      );
+      res.cookie("userToken", accessToken, {
+        maxAge: 3 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      });
       const { password, ...others } = user._doc;
       if (psw !== req.body.password) res.status(401).json("Wrong password");
-      else res.status(200).json(others);
+      else res.status(200).json({ ...others, accessToken });
     } catch (e) {
       console.log(e);
       res.status(500).json(e);
     }
+  },
+  logout: (req, res) => {
+    res.clearCookie("userToken");
+    res.json("Successfully logged out");
   },
 };
 

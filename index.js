@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
+const cookieParser = require("cookie-parser");
 const router = require("./routers/userRouter");
 const app = express();
 
@@ -14,6 +15,7 @@ const dbConnection = async () => {
 };
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(router);
 
 const PORT = 5000 || process.env.PORT;
