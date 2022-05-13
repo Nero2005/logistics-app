@@ -260,8 +260,8 @@ const otpCtrl = {
       client.messages
         .create({
           body: phone_message,
-          messagingServiceSid: "MG0c4993ac00158415291a7b030b1e48c5",
-          from: "+12395227426",
+          messagingServiceSid: process.env.MESSAGING_SERVICE_SID,
+          from: process.env.TWILIO_PHONE_NUMBER,
           to: `+${phone_number}`,
         })
         .then((message) => console.log(message.sid))
