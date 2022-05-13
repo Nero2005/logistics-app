@@ -23,4 +23,14 @@ const authToken = async (req, res, next) => {
   }
 };
 
-module.exports = authToken;
+const authOTPVerified = async (req, res, next) => {
+  const phone_number = req.body.phone_number;
+  const foundUser = await User.findOne({ phone_number: phone_number });
+  if (foundUser.otp_verified) {
+    next();
+  } else {
+    return res.status(403).json("Phone number not verified");
+  }
+}
+
+module.exports = {authToken, authOTPVerified};

@@ -1,3 +1,4 @@
+require("dotenv").config();
 const { OTP } = require("../sequelize");
 const { encode, decode } = require("../middlewares/crypt");
 const otpGenerator = require("otp-generator");
@@ -201,13 +202,14 @@ const otpCtrl = {
       }
 
       // Generate OTP
-      const otp = otpGenerator.generate(6, {
-        alphabets: false,
-        upperCase: false,
+      const otp = otpGenerator.generate(4, {
+        lowerCaseAlphabets: false,
+        upperCaseAlphabets: false,
         specialChars: false,
       });
+
       const now = new Date();
-      const expiration_time = AddMinutesToDate(now, 5);
+      const expiration_time = AddMinutesToDate(now, 10);
 
       const newOTP = new OTP({
         otp: otp,
@@ -245,22 +247,27 @@ const otpCtrl = {
         }
       }
 
-      let params = {
-        Message: phone_message,
-        PhoneNumber: phone_number,
-      };
-
-      let publishTextPromise = new AWS.SNS({ apiVersion: "2010-03-31" })
-        .publish(params)
-        .promise();
-
-      publishTextPromise
-        .then(function (data) {
-          return res.status(200).json({ Status: "Success", Details: encoded });
+      // let params = {
+      //   Message: phone_message,
+      //   PhoneNumber: phone_number,
+      // };
+      const accountSid = process.env.ACCOUNT_SID;
+      const authToken = process.env.AUTH_TOKEN;
+      const client = require("twilio")(accountSid, authToken);
+      const newUser = new User({
+        phone_number: phone_number,
+      });
+      client.messages
+        .create({
+          body: phone_message,
+          messagingServiceSid: "MG0c4993ac00158415291a7b030b1e48c5",
+          from: "+12395227426",
+          to: `+${phone_number}`,
         })
-        .catch(function (err) {
-          return res.status(400).send({ Status: "Failure", Details: err });
-        });
+        .then((message) => console.log(message.sid))
+        .done();
+      await newUser.save();
+      return res.status(200).json({ Status: "Success", Details: encoded });
     } catch (err) {
       const response = { Status: "Failure", Details: err.message };
       return res.status(400).send(response);
@@ -327,7 +334,7 @@ const otpCtrl = {
               // Mark OTP as verified or used
               otp_instance.verified = true;
               await otp_instance.save();
-              const foundUser = await User.findOne({ email: check_obj });
+              const foundUser = await User.findOne({ phone_number: check_obj });
               foundUser.otp_verified = true;
               await foundUser.save();
               const response = {
