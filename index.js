@@ -8,6 +8,7 @@ const logger = require("morgan");
 const cors = require("cors");
 const userRouter = require("./routers/userRouter");
 const otpRouter = require("./routers/otpRouter");
+const paymentRouter = require("./routers/paymentRouter");
 const app = express();
 
 const dbConnection = async () => {
@@ -33,6 +34,7 @@ app.use(helmet());
 app.use(logger("common"));
 app.use(userRouter);
 app.use(otpRouter);
+app.use(paymentRouter);
 
 const PORT = 5000 || process.env.PORT;
 
