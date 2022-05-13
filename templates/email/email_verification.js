@@ -11,4 +11,4 @@ const message = (otp) => {
   );
 };
 
-module.exports = { subject_mail, message };
+export { subject_mail, message };

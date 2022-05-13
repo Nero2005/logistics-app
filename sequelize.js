@@ -1,6 +1,5 @@
-const Sequelize = require("sequelize");
-const OTP_Model = require("./models/OTP");
+import OTP_Model from "./models/OTP.js";
 
-const OTP = OTP_Model(Sequelize);
+const OTP = OTP_Model();
 
-module.exports = { OTP };
+export { OTP };

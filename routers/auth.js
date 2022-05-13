@@ -1,5 +1,5 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
 const authToken = async (req, res, next) => {
   let authHeader;
@@ -31,6 +31,6 @@ const authOTPVerified = async (req, res, next) => {
   } else {
     return res.status(403).json("Phone number not verified");
   }
-}
+};
 
-module.exports = {authToken, authOTPVerified};
+export { authToken, authOTPVerified };

@@ -7,4 +7,4 @@ const message = (otp) => {
   );
 };
 
-module.exports = message;
+export { message };

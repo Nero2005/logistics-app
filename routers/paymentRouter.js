@@ -1,8 +1,11 @@
-const paymentCtrl = require("../controllers/paymentCtrl");
-const { authToken, authOTPVerified } = require("./auth");
+import paymentCtrl from "../controllers/paymentCtrl.js";
+import { authToken, authOTPVerified } from "./auth.js";
 
-const paymentRouter = require("express").Router();
+import express from "express";
+
+const paymentRouter = express.Router();
+
 
 paymentRouter.route("/api/v1/payments/pay").post(authToken, paymentCtrl.pay);
 
-module.exports = paymentRouter;
+export default paymentRouter;

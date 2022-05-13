@@ -1,6 +1,6 @@
-const User = require("../models/User");
-const CryptoJS = require("crypto-js");
-const jwt = require("jsonwebtoken");
+import User from "../models/User.js";
+import CryptoJS from "crypto-js";
+import jwt from "jsonwebtoken";
 
 const userCtrl = {
   setPassword: async (req, res) => {
@@ -125,4 +125,4 @@ const userCtrl = {
   },
 };
 
-module.exports = userCtrl;
+export default userCtrl;

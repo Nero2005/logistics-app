@@ -1,5 +1,4 @@
-const crypto = require("crypto");
-const CryptoJS = require("crypto-js");
+import CryptoJS from "crypto-js";
 
 // First we get our unique key to encrypt our object
 // var password = process.env.CRYPT_PASSWORD;
@@ -76,4 +75,4 @@ function decode(string) {
   return decrypted.toString(CryptoJS.enc.Utf8);
 }
 
-module.exports = { encode, decode };
+export { encode, decode };

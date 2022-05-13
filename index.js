@@ -1,14 +1,15 @@
-require("dotenv").config();
-const express = require("express");
-const mongoose = require("mongoose");
-const cookieParser = require("cookie-parser");
-const path = require("path");
-const helmet = require("helmet");
-const logger = require("morgan");
-const cors = require("cors");
-const userRouter = require("./routers/userRouter");
-const otpRouter = require("./routers/otpRouter");
-const paymentRouter = require("./routers/paymentRouter");
+import "dotenv/config";
+import express from "express";
+import mongoose from "mongoose";
+import cookieParser from "cookie-parser";
+import path from "path";
+import helmet from "helmet";
+import logger from "morgan";
+import cors from "cors";
+import userRouter from "./routers/userRouter.js";
+import otpRouter from "./routers/otpRouter.js";
+import paymentRouter from "./routers/paymentRouter.js";
+
 const app = express();
 
 const dbConnection = async () => {
@@ -20,7 +21,7 @@ const dbConnection = async () => {
   }
 };
 
-let corsOption = {
+const corsOption = {
   origin: "*",
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,

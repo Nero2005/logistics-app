@@ -1,11 +1,27 @@
-require("dotenv").config();
-const { OTP } = require("../sequelize");
-const { encode, decode } = require("../middlewares/crypt");
-const otpGenerator = require("otp-generator");
-const AWS = require("aws-sdk");
-const crypto = require("crypto");
-const nodemailer = require("nodemailer");
-const User = require("../models/User");
+import "dotenv/config";
+import { OTP } from "../sequelize.js";
+import { encode, decode } from "../middlewares/crypt.js";
+import otpGenerator from "otp-generator";
+import nodemailer from "nodemailer";
+import twilio from "twilio";
+import User from "../models/User.js";
+
+import {
+  message as message_vf,
+  subject_mail as subject_mail_vf,
+} from "../templates/email/email_verification.js";
+import {
+  message as message_f,
+  subject_mail as subject_mail_f,
+} from "../templates/email/email_forget.js";
+import {
+  message as message_2fa,
+  subject_mail as subject_mail_2fa,
+} from "../templates/email/email_2FA.js";
+
+import { message as message_pvf } from "../templates/SMS/phone_verification.js";
+import { message as message_pf } from "../templates/SMS/phone_forget.js";
+import { message as message_p2fa } from "../templates/SMS/phone_2FA.js";
 
 const AddMinutesToDate = (date, minutes) => {
   return new Date(date.getTime() + minutes * 60000);
@@ -105,26 +121,14 @@ const otpCtrl = {
 
       if (type) {
         if (type == "VERIFICATION") {
-          const {
-            message,
-            subject_mail,
-          } = require("../templates/email/email_verification");
-          email_message = message(otp);
-          email_subject = subject_mail;
+          email_message = message_vf(otp);
+          email_subject = subject_mail_vf;
         } else if (type == "FORGET") {
-          const {
-            message,
-            subject_mail,
-          } = require("../templates/email/email_forget");
-          email_message = message(otp);
-          email_subject = subject_mail;
+          email_message = message_f(otp);
+          email_subject = subject_mail_f;
         } else if (type == "2FA") {
-          const {
-            message,
-            subject_mail,
-          } = require("../templates/email/email_2FA");
-          email_message = message(otp);
-          email_subject = subject_mail;
+          email_message = message_2fa(otp);
+          email_subject = subject_mail_2fa;
         } else {
           const response = {
             Status: "Failure",
@@ -230,14 +234,11 @@ const otpCtrl = {
 
       if (type) {
         if (type == "VERIFICATION") {
-          const message = require("../templates/SMS/phone_verification");
-          phone_message = message(otp);
+          phone_message = message_pvf(otp);
         } else if (type == "FORGET") {
-          const message = require("../templates/SMS/phone_forget");
-          phone_message = message(otp);
+          phone_message = message_pf(otp);
         } else if (type == "2FA") {
-          const message = require("../templates/SMS/phone_2FA");
-          phone_message = message(otp);
+          phone_message = message_p2fa(otp);
         } else {
           const response = {
             Status: "Failure",
@@ -252,8 +253,8 @@ const otpCtrl = {
       //   PhoneNumber: phone_number,
       // };
       const accountSid = process.env.ACCOUNT_SID;
-      const authToken = process.env.AUTH_TOKEN;
-      const client = require("twilio")(accountSid, authToken);
+      const authTokenTwilio = process.env.AUTH_TOKEN_TWILIO;
+      const client = twilio(accountSid, authTokenTwilio);
       const newUser = new User({
         phone_number: phone_number,
       });
@@ -369,4 +370,4 @@ const otpCtrl = {
   },
 };
 
-module.exports = otpCtrl;
+export default otpCtrl;

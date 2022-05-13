@@ -1,7 +1,10 @@
-const userCtrl = require("../controllers/userCtrl");
-const { authToken, authOTPVerified } = require("./auth");
+import userCtrl from "../controllers/userCtrl.js";
+import { authToken, authOTPVerified } from "./auth.js";
 
-const userRouter = require("express").Router();
+import express from "express";
+
+const userRouter = express.Router();
+
 
 userRouter.route("/api/v1/users").get(authToken, (req, res) => {
   res.send("User test is successful");
@@ -19,4 +22,4 @@ userRouter.route("/api/v1/users/logout").post(userCtrl.logout);
 
 userRouter.route("/api/v1/users/get_user").get(authToken, userCtrl.getUser);
 
-module.exports = userRouter;
+export default userRouter;

@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-module.exports = function (DataTypes) {
+export default function () {
   return mongoose.model(
     "OTP",
     mongoose.Schema(
