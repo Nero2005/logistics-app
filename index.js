@@ -7,6 +7,7 @@ import helmet from "helmet";
 import logger from "morgan";
 import cors from "cors";
 import userRouter from "./routers/userRouter.js";
+import riderRouter from "./routers/riderRouter.js";
 import otpRouter from "./routers/otpRouter.js";
 import paymentRouter from "./routers/paymentRouter.js";
 
@@ -34,6 +35,7 @@ app.use(cors(corsOption));
 app.use(helmet());
 app.use(logger("common"));
 app.use(userRouter);
+app.use(riderRouter);
 app.use(otpRouter);
 app.use(paymentRouter);
 

@@ -83,7 +83,7 @@ const userCtrl = {
   },
   login: async (req, res) => {
     try {
-      const user = await User.findOne({ username: req.body.username });
+      const user = await User.findOne({ email: req.body.email });
       if (!user) res.status(401).json("Wrong credentials");
       const hashedPassword = CryptoJS.AES.decrypt(
         user.password,

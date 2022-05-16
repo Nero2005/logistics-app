@@ -1,11 +1,11 @@
 import jwt from "jsonwebtoken";
-import User from "../models/User.js";
+import Rider from "../models/Rider.js";
 
-const authToken = async (req, res, next) => {
+const authRiderToken = async (req, res, next) => {
   let authHeader;
   if (req.headers.cookie) {
     for (let ck of req.headers.cookie.split(";")) {
-      if (ck.split("=")[0] === "userToken") {
+      if (ck.split("=")[0] === "riderToken") {
         authHeader = ck.split("=")[1];
       }
     }
@@ -15,12 +15,12 @@ const authToken = async (req, res, next) => {
     jwt.verify(authHeader, process.env.JWT_SECRET, async (err, user) => {
       if (err)
         res.status(403).json("Token is not valid! Please login or Register");
-      const foundUser = await User.findOne({ _id: user.id });
-      if (foundUser.otp_verified) {
+      const foundRider = await Rider.findOne({ _id: user.id });
+      if (foundRider.otp_verified && user.isRider) {
         req.user = user;
         next();
       } else
-        return res.status(403).json("User email or phone number not verified");
+        return res.status(403).json("Rider email or phone number not verified");
     });
   } else {
     return res
@@ -29,14 +29,14 @@ const authToken = async (req, res, next) => {
   }
 };
 
-const authOTPVerified = async (req, res, next) => {
+const authRiderOTPVerified = async (req, res, next) => {
   const phone_number = req.body.phone_number;
-  const foundUser = await User.findOne({ phone_number: phone_number });
-  if (foundUser.otp_verified) {
+  const foundRider = await Rider.findOne({ phone_number: phone_number });
+  if (foundRider.otp_verified) {
     next();
   } else {
     return res.status(403).json("Phone number not verified");
   }
 };
 
-export { authToken, authOTPVerified };
+export { authRiderToken, authRiderOTPVerified };
