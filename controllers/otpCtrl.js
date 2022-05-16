@@ -5,6 +5,7 @@ import otpGenerator from "otp-generator";
 import nodemailer from "nodemailer";
 import twilio from "twilio";
 import User from "../models/User.js";
+import Rider from "../models/Rider.js";
 
 import {
   message as message_vf,
@@ -279,7 +280,7 @@ const otpCtrl = {
       var currentdate = new Date();
       console.log(currentdate.getHours());
       console.log(currentdate);
-      const { verification_key, otp, check } = req.body;
+      const { verification_key, otp, check, role } = req.body;
 
       if (!verification_key) {
         const response = {
@@ -335,9 +336,19 @@ const otpCtrl = {
               // Mark OTP as verified or used
               otp_instance.verified = true;
               await otp_instance.save();
-              const foundUser = await User.findOne({ phone_number: check_obj });
-              foundUser.otp_verified = true;
-              await foundUser.save();
+              if (role.toLowerCase() === "user") {
+                const foundUser = await User.findOne({
+                  phone_number: check_obj,
+                });
+                foundUser.otp_verified = true;
+                await foundUser.save();
+              } else if (role.toLowerCase() === "rider") {
+                const foundRider = await Rider.findOne({
+                  phone_number: check_obj,
+                });
+                foundRider.otp_verified = true;
+                await foundRider.save();
+              }
               const response = {
                 Status: "Success",
                 Details: "OTP Matched",
