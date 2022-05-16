@@ -41,7 +41,7 @@ const transactionSchema = mongoose.Schema(
       enum: ["flutterwave"],
     },
   },
-  { collection: "Transaction", timestamps: true }
+  { collection: "transactions", timestamps: true }
 );
 
 export default mongoose.model("Transaction", transactionSchema);

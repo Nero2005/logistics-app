@@ -21,7 +21,7 @@ const walletTransactionSchema = mongoose.Schema(
       enum: ["successful", "pending", "failed"],
     },
   },
-  { collection: "walletTransaction", timestamps: true }
+  { collection: "walletTransactions", timestamps: true }
 );
 
 export default mongoose.model("walletTransaction", walletTransactionSchema);

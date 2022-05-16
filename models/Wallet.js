@@ -9,7 +9,7 @@ const walletSchema = mongoose.Schema(
       ref: "users",
     },
   },
-  { collection: "wallet", timestamps: true }
+  { collection: "wallets", timestamps: true }
 );
 
 export default mongoose.model("wallet", walletSchema);
