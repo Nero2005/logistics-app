@@ -83,6 +83,55 @@ const updateWallet = async (userId, amount) => {
   }
 };
 
+const fundWallet = async (user, id, status, currency, amount, customer) => {
+  const wallet = await validateUserWallet(user._id);
+  await createWalletTransaction(user._id, status, currency, amount);
+  await createTransaction(user._id, id, status, currency, amount, customer);
+  const updatedWallet = await updateWallet(user._id, amount);
+  return updatedWallet;
+};
+
+const transactionAlreadyExists = async (transaction_id) => {
+  const transactionExist = await Transaction.findOne({
+    transactionId: transaction_id,
+  });
+  if (transactionExist) {
+    return res.status(409).json("Transaction Already Exists");
+  } else {
+    return null;
+  }
+};
+
+const confirmFundWallet = async (transaction_id) => {
+  const url = `https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`;
+
+  if (transactionAlreadyExists(transaction_id)) {
+    return transactionAlreadyExists(transaction_id);
+  }
+
+  const response = await got
+    .get(url, {
+      headers: {
+        Authorization: `${process.env.FLW_SECRET_KEY}`,
+      },
+    })
+    .json();
+  console.log(response.data);
+  // res.json("Testing")
+  const { status, currency, id, amount, customer } = response.data;
+
+  console.log(id);
+
+  const user = await User.findOne({ email: customer.email });
+  // user, id, status, currency, amount, customer
+  const wallet = await fundWallet(user, id, status, currency, amount, customer);
+
+  return res.status(200).json({
+    response: "Wallet funded successfully",
+    data: wallet,
+  });
+};
+
 const paymentCtrl = {
   pay: async (req, res) => {
     const { amount, currency, email, phone_number, name } = req.body;
@@ -129,34 +178,7 @@ const paymentCtrl = {
   confirmPayment: async (req, res) => {
     const { transaction_id } = req.query;
 
-    const url = `https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`;
-
-    const response = await got
-      .get(url, {
-        headers: {
-          Authorization: `${process.env.FLW_SECRET_KEY}`,
-        },
-      })
-      .json();
-    console.log(response.data);
-    // res.json("Testing")
-    const { status, currency, id, amount, customer } = response.data;
-
-    const transactionExist = await Transaction.findOne({ transactionId: id });
-    if (transactionExist) {
-      return res.status(409).json("Transaction Already Exists");
-    }
-
-    const user = await User.findOne({ email: customer.email });
-    const wallet = await validateUserWallet(user._id);
-    await createWalletTransaction(user._id, status, currency, amount);
-    await createTransaction(user._id, id, status, currency, amount, customer);
-    await updateWallet(user._id, amount);
-
-    return res.status(200).json({
-      response: "Wallet funded successfully",
-      data: wallet,
-    });
+    return confirmFundWallet(transaction_id);
   },
 };
 
