@@ -134,7 +134,18 @@ const confirmFundWallet = async (transaction_id) => {
 
 const paymentCtrl = {
   pay: async (req, res) => {
-    const { amount, currency, email, phone_number, name } = req.body;
+    const { amount, currency, email, phone_number, name, purpose } = req.body;
+    let redirect_url;
+    if (purpose.toLowerCase() === "fund wallet") {
+      redirect_url =
+        "http://localhost:5000/api/v1/payments/fund_wallet/confirm";
+    } else if (purpose.toLowerCase() === "card payment") {
+      redirect_url =
+        "http://localhost:5000/api/v1/payments/card_payment/confirm";
+    } else {
+      redirect_url = "";
+      return res.status(500).json("Invalid value for purpose");
+    }
     try {
       const response = await got
         .post("https://api.flutterwave.com/v3/payments", {
@@ -143,16 +154,16 @@ const paymentCtrl = {
           },
           json: {
             tx_ref: genTxRef(),
-            amount: amount,
-            currency: currency,
-            redirect_url: "http://localhost:5000/api/v1/payments/confirm",
+            amount,
+            currency,
+            redirect_url,
             customer: {
-              email: email,
+              email,
               phonenumber: phone_number,
-              name: name,
+              name,
             },
             customizations: {
-              title: "Logistics App Payments",
+              title: "Ocius Lite Payments",
             },
           },
         })
@@ -175,7 +186,7 @@ const paymentCtrl = {
       console.log(err);
     }
   },
-  confirmPayment: async (req, res) => {
+  confirmFundWalletPayment: async (req, res) => {
     const { transaction_id } = req.query;
 
     return confirmFundWallet(transaction_id);
