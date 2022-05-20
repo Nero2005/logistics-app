@@ -102,7 +102,7 @@ const transactionAlreadyExists = async (transaction_id) => {
   }
 };
 
-const confirmFundWallet = async (transaction_id) => {
+const confirmPayment = async (transaction_id) => {
   const url = `https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`;
 
   if (transactionAlreadyExists(transaction_id)) {
@@ -122,59 +122,55 @@ const confirmFundWallet = async (transaction_id) => {
 
   console.log(id);
 
-  const user = await User.findOne({ email: customer.email });
-  // user, id, status, currency, amount, customer
-  const wallet = await fundWallet(user, id, status, currency, amount, customer);
+  return response.data;
+};
 
-  return res.status(200).json({
-    response: "Wallet funded successfully",
-    data: wallet,
-  });
+const getPaymentLink = async (amount, currency, email, phone_number, name) => {
+  try {
+    const response = await got
+      .post("https://api.flutterwave.com/v3/payments", {
+        headers: {
+          Authorization: `Bearer ${process.env.FLW_SECRET_KEY}`,
+        },
+        json: {
+          tx_ref: genTxRef(),
+          amount,
+          currency,
+          redirect_url,
+          customer: {
+            email,
+            phonenumber: phone_number,
+            name,
+          },
+          customizations: {
+            title: "Ocius Lite Payments",
+          },
+        },
+      })
+      .json();
+    console.log(response);
+    return response;
+    // res.redirect(response.data.link);
+  } catch (err) {
+    console.log(err.code);
+    console.log(err.response.body);
+    return err;
+  }
 };
 
 const paymentCtrl = {
-  pay: async (req, res) => {
-    const { amount, currency, email, phone_number, name, purpose } = req.body;
-    let redirect_url;
-    if (purpose.toLowerCase() === "fund wallet") {
-      redirect_url =
-        "http://localhost:5000/api/v1/payments/fund_wallet/confirm";
-    } else if (purpose.toLowerCase() === "card payment") {
-      redirect_url =
-        "http://localhost:5000/api/v1/payments/card_payment/confirm";
-    } else {
-      redirect_url = "";
-      return res.status(500).json("Invalid value for purpose");
-    }
-    try {
-      const response = await got
-        .post("https://api.flutterwave.com/v3/payments", {
-          headers: {
-            Authorization: `Bearer ${process.env.FLW_SECRET_KEY}`,
-          },
-          json: {
-            tx_ref: genTxRef(),
-            amount,
-            currency,
-            redirect_url,
-            customer: {
-              email,
-              phonenumber: phone_number,
-              name,
-            },
-            customizations: {
-              title: "Ocius Lite Payments",
-            },
-          },
-        })
-        .json();
-      console.log(response);
-      res.json(response);
-      // res.redirect(response.data.link);
-    } catch (err) {
-      console.log(err.code);
-      console.log(err.response.body);
-    }
+  payFundWallet: async (req, res) => {
+    const { amount, currency, email, phone_number, name } = req.body;
+    const redirect_url = `${process.env.SERVER_HOST}/api/v1/payments/fund_wallet/confirm`;
+    const response = getPaymentLink(
+      amount,
+      currency,
+      email,
+      phone_number,
+      name,
+      redirect_url
+    );
+    res.json(response);
   },
   getWalletBalance: async (req, res) => {
     try {
@@ -189,7 +185,23 @@ const paymentCtrl = {
   confirmFundWalletPayment: async (req, res) => {
     const { transaction_id } = req.query;
 
-    return confirmFundWallet(transaction_id);
+    const { status, currency, id, amount, customer } =
+      confirmPayment(transaction_id);
+    const user = await User.findOne({ email: customer.email });
+    // user, id, status, currency, amount, customer
+    const wallet = await fundWallet(
+      user,
+      id,
+      status,
+      currency,
+      amount,
+      customer
+    );
+
+    return res.status(200).json({
+      response: "Wallet funded successfully",
+      data: wallet,
+    });
   },
 };
 

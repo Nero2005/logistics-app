@@ -5,7 +5,9 @@ import express from "express";
 
 const paymentRouter = express.Router();
 
-paymentRouter.route("/api/v1/payments/pay").post(authToken, paymentCtrl.pay);
+paymentRouter
+  .route("/api/v1/payments/fund_wallet/pay")
+  .post(authToken, paymentCtrl.payFundWallet);
 
 paymentRouter
   .route("/api/v1/payments/fund_wallet/confirm")
