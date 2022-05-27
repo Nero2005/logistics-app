@@ -176,7 +176,8 @@ const userCtrl = {
     res.status(200).json(pendingOrders);
   },
   getNotifications: async (req, res) => {
-    const userNots = await NotificationUser.find();
+    const user_id = req.user.id;
+    const userNots = await NotificationUser.find({ user_id: user_id });
     res.status(200).json(userNots);
   },
 };

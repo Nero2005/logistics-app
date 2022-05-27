@@ -14,6 +14,14 @@ orderRouter
   .post(authRiderToken, orderCtrl.acceptOrder);
 
 orderRouter
+  .route("/api/v1/orders/decline_order")
+  .post(authRiderToken, orderCtrl.declineOrder);
+
+orderRouter
+  .route("/api/v1/orders/change_rider")
+  .post(authToken, orderCtrl.changeRider);
+
+orderRouter
   .route("/api/v1/orders/picked_up_order")
   .post(authRiderToken, orderCtrl.pickedUp);
 

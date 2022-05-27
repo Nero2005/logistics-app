@@ -128,14 +128,21 @@ const riderCtrl = {
       foundRider.active = rider_status;
       await foundRider.save();
       const admin = await Company.findOne();
-      if (admin.riders.indexOf(foundRider._id) > -1) {
+      console.log(admin.riders.indexOf(foundRider._id));
+      if (admin.riders.indexOf(foundRider._id) == -1) {
+        console.log("Here");
         admin.riders.push(foundRider._id);
+        await admin.save();
       }
       const index = admin.active_riders.indexOf(foundRider._id);
-      if (index > -1 && rider_status) {
+      if (index == -1 && rider_status) {
+        console.log("Here 2");
         admin.active_riders.push(foundRider._id);
+        await admin.save();
       } else if (!rider_status && index > -1) {
+        console.log("Here 3");
         admin.active_riders.splice(index, 1);
+        await admin.save();
       }
       res.status(200).json({
         message: `Status set successfully to ${
@@ -204,14 +211,28 @@ const riderCtrl = {
     res.status(200).json(riders);
   },
   removeRider: async (req, res) => {
-    const { rider_id } = req.body;
-    const deletedRider = Rider.findOneAndDelete({ _id: rider_id });
-    res
-      .status(200)
-      .json({ ...deletedRider, message: "Rider removed successfully" });
+    try {
+      const { rider_id } = req.body;
+      const deletedRider = Rider.findOneAndDelete({ _id: rider_id });
+      if (deletedRider) {
+        const indexA = admin.active_riders.indexOf(rider_id);
+        const indexR = admin.riders.indexOf(rider_id);
+        const admin = await Company.findOne();
+        admin.active_riders.splice(indexA, 1);
+        admin.riders.splice(indexR, 1);
+        await admin.save();
+      }
+      return res
+        .status(200)
+        .json({ ...deletedRider, message: "Rider removed successfully" });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json(err);
+    }
   },
   getNotifications: async (req, res) => {
-    const riderNots = await NotificationRider.find();
+    const rider_id = req.user.id;
+    const riderNots = await NotificationRider.find({ rider_id: rider_id });
     res.status(200).json(riderNots);
   },
 };

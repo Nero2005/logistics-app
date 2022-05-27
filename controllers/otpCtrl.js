@@ -262,15 +262,6 @@ const otpCtrl = {
         number: parseInt(phone_number.toString().substring(3)),
       });
       await newNumber.save();
-      client.messages
-        .create({
-          body: phone_message,
-          messagingServiceSid: process.env.MESSAGING_SERVICE_SID,
-          from: process.env.TWILIO_PHONE_NUMBER,
-          to: `+${phone_number}`,
-        })
-        .then((message) => console.log(message.sid))
-        .done();
       if (role.toLowerCase() === "user") {
         const newUser = new User({
           phone_number: newNumber._id,
@@ -282,6 +273,15 @@ const otpCtrl = {
         });
         await newRider.save();
       }
+      client.messages
+        .create({
+          body: phone_message,
+          messagingServiceSid: process.env.MESSAGING_SERVICE_SID,
+          from: process.env.TWILIO_PHONE_NUMBER,
+          to: `+${phone_number}`,
+        })
+        .then((message) => console.log(message.sid))
+        .done();
       return res.status(200).json({ Status: "Success", Details: encoded });
     } catch (err) {
       const response = { Status: "Failure", Details: err.message };

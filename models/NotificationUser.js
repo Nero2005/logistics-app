@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const notificationUserSchema = mongoose.Schema(
   {
-    userId: {
+    user_id: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "users",
@@ -19,7 +19,7 @@ const notificationUserSchema = mongoose.Schema(
       type: String,
     },
     order_id: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: "orders",
     },
   },

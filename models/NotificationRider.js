@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const notificationRiderSchema = mongoose.Schema(
   {
-    riderId: {
+    rider_id: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "riders",
@@ -19,7 +19,7 @@ const notificationRiderSchema = mongoose.Schema(
       type: String,
     },
     order_id: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: "orders",
     },
   },

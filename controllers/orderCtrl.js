@@ -7,6 +7,7 @@ import NotificationRider from "../models/NotificationRider.js";
 import User from "../models/User.js";
 import LocationCol from "../models/Location.js";
 import Rider from "../models/Rider.js";
+import Company from "../models/Company.js";
 
 const genOrderId = () => {
   return (
@@ -57,20 +58,29 @@ const orderCtrl = {
   createOrder: async (req, res) => {
     try {
       const { description, packages, price, rider_id } = req.body;
+      /*"description": "Best phone ever order",
+    "packages": [{
+        "package_id": "smpg8t94u2",
+        "quantity": 1
+    }],
+    "price": 375000,
+    "rider_id": "6290c277e3bbd3c0de26c41e" */
       let { delivery_location } = req.body;
 
       const user_id = req.user.id;
       const order_id = genOrderId();
       const pickup_locations = [];
-      packages.forEach(async (element) => {
+      for (let element of packages) {
         const package_ordered = await Package.findOne({
-          package_id: element.package_id,
+          package_id: element.package_id, // smpg8t94u2
         });
         const oldQty = package_ordered.quantity;
         package_ordered.quantity = oldQty - element.quantity;
         await package_ordered.save();
+        console.log(package_ordered.pickup_location);
         pickup_locations.push(package_ordered.pickup_location);
-      });
+        console.log(pickup_locations);
+      }
       const user = await User.findById(user_id);
       if (!user.current_location && !delivery_location) {
         return res
@@ -81,21 +91,27 @@ const orderCtrl = {
       } else if (user.current_location && !delivery_location) {
         delivery_location = user.current_location;
       }
+      const package_ids = packages.map((elem) => elem.package_id);
+      console.log(pickup_locations);
       const newOrder = await Order.create({
         order_id,
         description,
         price,
         user_id,
         rider_id,
-        packages,
+        packages: package_ids,
         pickup_locations,
         delivery_location,
         order_status: "pending",
       });
 
       const rider = await Rider.findById(rider_id);
+      const admin = await Company.findOne();
 
       rider.orders.push(newOrder._id);
+      await rider.save();
+      admin.orders.push(newOrder._id);
+      await admin.save();
 
       createOrderNotification(
         user_id,
@@ -105,7 +121,7 @@ const orderCtrl = {
         `You have received a new order with order id ${order_id}`,
         rider_id
       );
-      return res.status(201).json({ ...newOrder, status: "successful" });
+      return res.status(201).json({ ...newOrder._doc, status: "successful" });
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);
@@ -152,7 +168,7 @@ const orderCtrl = {
         `You have declined order with order id ${order_id}`,
         rider_id
       );
-      return res.status(200).json({ message: "order accepted" });
+      return res.status(200).json({ message: "order declined" });
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);
@@ -164,6 +180,15 @@ const orderCtrl = {
       const foundOrder = await Order.findOne({ order_id });
       foundOrder.rider_id = rider_id;
       await foundOrder.save();
+      createOrderNotification(
+        req.user.id,
+        order_id,
+        "Rider Changed",
+        `Your rider for order ${order_id} has been changed.`,
+        `You have received a new order with order id ${order_id}`,
+        rider_id
+      );
+      res.status(200).json({ message: "rider changed successfully" });
     } catch (err) {
       console.log(err);
       res.status(500).json(err);
@@ -211,7 +236,7 @@ const orderCtrl = {
         quantity,
         pickup_location: loc._id,
       });
-      return res.status(201).json({ ...newPackage, status: "successful" });
+      return res.status(201).json({ ...newPackage._doc, status: "successful" });
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);
