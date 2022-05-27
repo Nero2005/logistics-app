@@ -1,12 +1,14 @@
 import mongoose from "mongoose";
+import LocationCol from "./Location.js";
 
 const packageSchema = mongoose.Schema(
   {
-    packageName: {
+    package_id: {
       type: String,
       required: true,
     },
-    packageDetails: {
+    description: { type: String },
+    package_name: {
       type: String,
       required: true,
     },
@@ -14,8 +16,10 @@ const packageSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
-    location: {
-      type: String,
+    quantity: { type: Number, required: true },
+    pickup_location: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "location",
       required: true,
     },
   },

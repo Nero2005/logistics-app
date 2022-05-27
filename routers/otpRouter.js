@@ -4,7 +4,7 @@ import express from "express";
 
 const otpRouter = express.Router();
 
-otpRouter.route("/api/v1/email/otp").post(otpCtrl.otpEmail);
+// otpRouter.route("/api/v1/email/otp").post(otpCtrl.otpEmail);
 
 otpRouter.route("/api/v1/phone/otp").post(otpCtrl.otpPhone);
 

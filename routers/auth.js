@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import PhoneNumber from "../models/PhoneNumber.js";
 
 const authToken = async (req, res, next) => {
   let authHeader;
@@ -31,7 +32,12 @@ const authToken = async (req, res, next) => {
 
 const authOTPVerified = async (req, res, next) => {
   const phone_number = req.body.phone_number;
-  const foundUser = await User.findOne({ phone_number: phone_number });
+  const foundNumber = await PhoneNumber.findOne({
+    number: parseInt(phone_number.toString().substring(3)),
+  });
+  const foundUser = await User.findOne({
+    phone_number: foundNumber._id,
+  });
   if (foundUser.otp_verified) {
     next();
   } else {

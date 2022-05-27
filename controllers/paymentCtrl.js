@@ -5,7 +5,7 @@ import Wallet from "../models/Wallet.js";
 import WalletTransaction from "../models/WalletTransaction.js";
 import Transaction from "../models/Transaction.js";
 
-const genTxRef = (len) => {
+const genTxRef = () => {
   return (
     "tx-" +
     otpGenerator.generate(17, {
@@ -13,6 +13,14 @@ const genTxRef = (len) => {
       specialChars: false,
     })
   );
+};
+
+const genTxId = () => {
+  return otpGenerator.generate(7, {
+    lowerCaseAlphabets: false,
+    upperCaseAlphabets: false,
+    specialChars: false,
+  });
 };
 
 const validateUserWallet = async (userId) => {
@@ -160,17 +168,72 @@ const getPaymentLink = async (amount, currency, email, phone_number, name) => {
 
 const paymentCtrl = {
   payFundWallet: async (req, res) => {
-    const { amount, currency, email, phone_number, name } = req.body;
-    const redirect_url = `${process.env.SERVER_HOST}/api/v1/payments/fund_wallet/confirm`;
-    const response = getPaymentLink(
-      amount,
-      currency,
-      email,
-      phone_number,
-      name,
-      redirect_url
-    );
-    res.json(response);
+    try {
+      const { amount, currency, email, phone_number, name } = req.body;
+      const redirect_url = `${process.env.SERVER_HOST}/api/v1/payments/fund_wallet/confirm`;
+      const response = getPaymentLink(
+        amount,
+        currency,
+        email,
+        phone_number,
+        name,
+        redirect_url
+      );
+      res.json(response);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json(err);
+    }
+  },
+  payWithCard: async (req, res) => {
+    try {
+      const { amount, currency, email, phone_number, name } = req.body;
+      const redirect_url = `${process.env.SERVER_HOST}/api/v1/payments/with_card/confirm`;
+      const response = getPaymentLink(
+        amount,
+        currency,
+        email,
+        phone_number,
+        name,
+        redirect_url
+      );
+      res.json(response);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json(err);
+    }
+  },
+  payWithWallet: async (req, res) => {
+    try {
+      const { amount, currency, email, phone_number, name } = req.body;
+      const userId = req.user.id;
+      const wallet = await Wallet.findOne({ userId });
+      const balance = wallet.balance;
+      if (amount > balance) {
+        await createTransaction(
+          userId,
+          genTxId(),
+          "failed",
+          currency,
+          amount,
+          customer
+        );
+        return res.status(500).json({ message: "Wallet funds insufficient" });
+      }
+      const customer = { name, email, phone_number };
+      await createTransaction(
+        userId,
+        genTxId(),
+        "successful",
+        currency,
+        amount,
+        customer
+      );
+      return res.status(200).json({ message: "Payment successful" });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json(err);
+    }
   },
   getWalletBalance: async (req, res) => {
     try {
@@ -180,28 +243,49 @@ const paymentCtrl = {
       res.status(200).json(wallet.balance);
     } catch (err) {
       console.log(err);
+      res.status(500).json(err);
+    }
+  },
+  confirmPaymentWithCard: async (req, res) => {
+    try {
+      const { transaction_id } = req.query;
+      const { status, currency, id, amount, customer } =
+        confirmPayment(transaction_id);
+      const user = await User.findOne({ email: customer.email });
+      await createTransaction(user._id, id, status, currency, amount, customer);
+      return res.status(200).json({
+        response: "Payment successful",
+      });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json(err);
     }
   },
   confirmFundWalletPayment: async (req, res) => {
-    const { transaction_id } = req.query;
+    try {
+      const { transaction_id } = req.query;
 
-    const { status, currency, id, amount, customer } =
-      confirmPayment(transaction_id);
-    const user = await User.findOne({ email: customer.email });
-    // user, id, status, currency, amount, customer
-    const wallet = await fundWallet(
-      user,
-      id,
-      status,
-      currency,
-      amount,
-      customer
-    );
+      const { status, currency, id, amount, customer } =
+        confirmPayment(transaction_id);
+      const user = await User.findOne({ email: customer.email });
+      // user, id, status, currency, amount, customer
+      const wallet = await fundWallet(
+        user,
+        id,
+        status,
+        currency,
+        amount,
+        customer
+      );
 
-    return res.status(200).json({
-      response: "Wallet funded successfully",
-      data: wallet,
-    });
+      return res.status(200).json({
+        response: "Wallet funded successfully",
+        data: wallet,
+      });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json(err);
+    }
   },
 };
 
