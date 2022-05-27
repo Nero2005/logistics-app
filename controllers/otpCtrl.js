@@ -23,6 +23,7 @@ import {
 import { message as message_pvf } from "../templates/SMS/phone_verification.js";
 import { message as message_pf } from "../templates/SMS/phone_forget.js";
 import { message as message_p2fa } from "../templates/SMS/phone_2FA.js";
+import PhoneNumber from "../models/PhoneNumber.js";
 
 const AddMinutesToDate = (date, minutes) => {
   return new Date(date.getTime() + minutes * 60000);
@@ -189,7 +190,7 @@ const otpCtrl = {
   },
   otpPhone: async (req, res, next) => {
     try {
-      const { phone_number, type } = req.body;
+      const { phone_number, type, role } = req.body;
 
       let phone_message;
 
@@ -256,9 +257,22 @@ const otpCtrl = {
       const accountSid = process.env.ACCOUNT_SID;
       const authTokenTwilio = process.env.AUTH_TOKEN_TWILIO;
       const client = twilio(accountSid, authTokenTwilio);
-      const newUser = new User({
-        phone_number: phone_number,
+      const newNumber = new PhoneNumber({
+        country_code: parseInt(phone_number.toString().substring(0, 3)),
+        number: parseInt(phone_number.toString().substring(3)),
       });
+      await newNumber.save();
+      if (role.toLowerCase() === "user") {
+        const newUser = new User({
+          phone_number: newNumber._id,
+        });
+        await newUser.save();
+      } else if (role.toLowerCase() === "rider") {
+        const newRider = new Rider({
+          phone_number: newNumber._id,
+        });
+        await newRider.save();
+      }
       client.messages
         .create({
           body: phone_message,
@@ -268,7 +282,6 @@ const otpCtrl = {
         })
         .then((message) => console.log(message.sid))
         .done();
-      await newUser.save();
       return res.status(200).json({ Status: "Success", Details: encoded });
     } catch (err) {
       const response = { Status: "Failure", Details: err.message };
@@ -332,19 +345,22 @@ const otpCtrl = {
           console.log(otp_instance.expiration_time);
           if (dates.compare(otp_instance.expiration_time, currentdate) == 1) {
             //Check if OTP is equal to the OTP in the DB
-            if (otp === otp_instance.otp) {
+            if (otp == otp_instance.otp) {
               // Mark OTP as verified or used
               otp_instance.verified = true;
               await otp_instance.save();
+              const foundNumber = await PhoneNumber.findOne({
+                number: parseInt(check_obj.toString().substring(3)),
+              });
               if (role.toLowerCase() === "user") {
                 const foundUser = await User.findOne({
-                  phone_number: check_obj,
+                  phone_number: foundNumber._id,
                 });
                 foundUser.otp_verified = true;
                 await foundUser.save();
               } else if (role.toLowerCase() === "rider") {
                 const foundRider = await Rider.findOne({
-                  phone_number: check_obj,
+                  phone_number: foundNumber._id,
                 });
                 foundRider.otp_verified = true;
                 await foundRider.save();

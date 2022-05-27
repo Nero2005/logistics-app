@@ -11,6 +11,7 @@ import riderRouter from "./routers/riderRouter.js";
 import otpRouter from "./routers/otpRouter.js";
 import paymentRouter from "./routers/paymentRouter.js";
 import orderRouter from "./routers/orderRouter.js";
+import adminRouter from "./routers/adminRouter.js";
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use(riderRouter);
 app.use(otpRouter);
 app.use(paymentRouter);
 app.use(orderRouter);
+app.use(adminRouter);
 
 const PORT = 5000 || process.env.PORT;
 

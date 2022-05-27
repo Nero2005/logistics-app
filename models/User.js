@@ -1,22 +1,27 @@
 import mongoose from "mongoose";
+import PhoneNumber from "./PhoneNumber.js";
+import LocationCol from "./Location.js";
 
 const userSchema = mongoose.Schema(
   {
-    username: {
+    first_name: {
       type: String,
-      required: true,
-      default: "To Be Added",
-      unique: true,
+    },
+    last_name: {
+      type: String,
     },
     email: {
       type: String,
-      required: true,
-      default: "To Be Added",
       unique: true,
     },
-    phone_number: { type: Number, required: true, unique: true },
-    password: { type: String, default: "To Be Added", required: true },
+    phone_number: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "phonenumber",
+    },
+    password: { type: String },
     otp_verified: { type: Boolean, default: false, allowNull: true },
+    current_location: { type: mongoose.Schema.Types.ObjectId, ref: "location" },
   },
   { timestamps: true }
 );

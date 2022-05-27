@@ -5,7 +5,6 @@ import express from "express";
 
 const userRouter = express.Router();
 
-
 userRouter.route("/api/v1/users").get(authToken, (req, res) => {
   res.send("User test is successful");
 });
@@ -17,9 +16,20 @@ userRouter
 userRouter
   .route("/api/v1/users/add_personal_info")
   .post(authOTPVerified, userCtrl.addPersonalInfo);
+userRouter
+  .route("/api/v1/users/add_delivery_location")
+  .post(authOTPVerified, userCtrl.addDeliveryLocation);
 userRouter.route("/api/v1/users/login").post(userCtrl.login);
 userRouter.route("/api/v1/users/logout").post(userCtrl.logout);
 
 userRouter.route("/api/v1/users/get_user").get(authToken, userCtrl.getUser);
+
+userRouter
+  .route("/api/v1/users/get_pending_orders")
+  .get(authToken, userCtrl.getPendingOrders);
+
+userRouter
+  .route("/api/v1/users/get_notifications")
+  .get(authToken, userCtrl.getNotifications);
 
 export default userRouter;
