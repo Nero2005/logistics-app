@@ -4,6 +4,7 @@ import User from "../models/User.js";
 import Wallet from "../models/Wallet.js";
 import WalletTransaction from "../models/WalletTransaction.js";
 import Transaction from "../models/Transaction.js";
+import Order from "../models/Order.js";
 
 const genTxRef = () => {
   return (
@@ -103,18 +104,14 @@ const transactionAlreadyExists = async (transaction_id) => {
   const transactionExist = await Transaction.findOne({
     transactionId: transaction_id,
   });
-  if (transactionExist) {
-    return res.status(409).json("Transaction Already Exists");
-  } else {
-    return null;
-  }
+  return transactionExist ? true : false;
 };
 
 const confirmPayment = async (transaction_id) => {
   const url = `https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`;
 
   if (transactionAlreadyExists(transaction_id)) {
-    return transactionAlreadyExists(transaction_id);
+    return res.status(409).json("Transaction Already Exists");
   }
 
   const response = await got
@@ -187,7 +184,9 @@ const paymentCtrl = {
   },
   payWithCard: async (req, res) => {
     try {
-      const { amount, currency, email, phone_number, name } = req.body;
+      const { order_id, currency, email, phone_number, name } = req.body;
+      const order = await Order.findOne({ order_id: order_id });
+      const amount = order.price;
       const redirect_url = `${process.env.SERVER_HOST}/api/v1/payments/with_card/confirm`;
       const response = getPaymentLink(
         amount,
@@ -205,7 +204,9 @@ const paymentCtrl = {
   },
   payWithWallet: async (req, res) => {
     try {
-      const { amount, currency, email, phone_number, name } = req.body;
+      const { order_id, currency, email, phone_number, name } = req.body;
+      const order = await Order.findOne({ order_id: order_id });
+      const amount = order.price;
       const userId = req.user.id;
       const wallet = await Wallet.findOne({ userId });
       const balance = wallet.balance;
@@ -221,18 +222,51 @@ const paymentCtrl = {
         return res.status(500).json({ message: "Wallet funds insufficient" });
       }
       const customer = { name, email, phone_number };
+      const transaction_details = {
+        customer,
+        order_id,
+        currency,
+        transaction_id: genTxId(),
+      };
+      return res.redirect(
+        `${process.env.SERVER_HOST}/api/v1/payments/with_wallet/confirm?transaction_details=${transaction_details}`
+      );
+    } catch (err) {
+      console.log(err);
+      res.status(500).json(err);
+    }
+  },
+  confirmPaymentWithWallet: async (req, res) => {
+    try {
+      const { transaction_details } = req.query;
+      const { customer, order_id, currency, transaction_id } =
+        transaction_details;
+      const order = await Order.findOne({ order_id: order_id });
+      const amount = order.price;
+
+      if (transactionAlreadyExists(transaction_id)) {
+        return res.status(409).json("Transaction Already Exists");
+      }
+      const userId = req.user.id;
+
       await createTransaction(
         userId,
-        genTxId(),
+        transaction_id,
         "successful",
         currency,
         amount,
         customer
       );
+
+      const wallet = await Wallet.findOne({ userId });
+      wallet.balance = wallet.balance - amount;
+      if (!order.paid) order.paid = true;
+      await order.save();
+      await wallet.save();
       return res.status(200).json({ message: "Payment successful" });
     } catch (err) {
       console.log(err);
-      res.status(500).json(err);
+      return res.status(500).json(err);
     }
   },
   getWalletBalance: async (req, res) => {

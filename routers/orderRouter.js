@@ -9,6 +9,12 @@ orderRouter
   .route("/api/v1/orders/create_order")
   .post(authToken, orderCtrl.createOrder);
 
+orderRouter.route("/api/v1/orders/get_packages").get(orderCtrl.getPackages);
+
+orderRouter.route("/api/v1/orders/get_package").get(orderCtrl.getPackage);
+
+orderRouter.route("/api/v1/orders/get_location").get(orderCtrl.getLocation);
+
 orderRouter
   .route("/api/v1/orders/accept_order")
   .post(authRiderToken, orderCtrl.acceptOrder);

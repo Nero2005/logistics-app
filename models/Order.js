@@ -28,8 +28,15 @@ const orderSchema = mongoose.Schema(
       type: String,
       enum: ["completed", "pending", "canceled"],
     },
-    pickup_locations: { type: [mongoose.Schema.Types.ObjectId], ref: "location" },
-    delivery_location: { type: mongoose.Schema.Types.ObjectId, ref: "location" },
+    paid: { type: Boolean, required: true, default: false },
+    pickup_locations: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "location",
+    },
+    delivery_location: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "location",
+    },
   },
   { collection: "orders", timestamps: true }
 );

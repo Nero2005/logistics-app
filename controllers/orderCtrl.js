@@ -75,6 +75,9 @@ const orderCtrl = {
           package_id: element.package_id, // smpg8t94u2
         });
         const oldQty = package_ordered.quantity;
+        if (oldQty <= 0) {
+          return res.status(500).json({ message: "Package not available" });
+        }
         package_ordered.quantity = oldQty - element.quantity;
         await package_ordered.save();
         console.log(package_ordered.pickup_location);
@@ -122,6 +125,35 @@ const orderCtrl = {
         rider_id
       );
       return res.status(201).json({ ...newOrder._doc, status: "successful" });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json(err);
+    }
+  },
+  getPackages: async (req, res) => {
+    try {
+      const packages = await Package.find();
+      return res.status(200).json(packages);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json(err);
+    }
+  },
+  getPackage: async (req, res) => {
+    try {
+      const packages = await Package.findOne({
+        package_id: req.body.package_id,
+      });
+      return res.status(200).json(packages);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json(err);
+    }
+  },
+  getLocation: async (req, res) => {
+    try {
+      const loc = await LocationCol.findOne({ _id: req.body.id });
+      return res.status(200).json(loc);
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);
