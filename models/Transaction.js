@@ -25,6 +25,10 @@ const transactionSchema = mongoose.Schema(
       type: Number,
       required: [true, "Amount is required"],
     },
+    orderId: {
+      type: String,
+      ref: "orders",
+    },
     currency: {
       type: String,
       required: [true, "Currency is required"],

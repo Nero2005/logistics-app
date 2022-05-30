@@ -27,19 +27,20 @@ const genPackageId = () => {
   });
 };
 
-const createOrderNotification = async (
+const createNotification = async (
   user_id,
   order_id,
   title,
   contentUser,
   contentRider,
+  notification_type,
   rider_id
 ) => {
   const userNot = await NotificationUser.create({
     user_id,
     title,
     content: contentUser,
-    notification_type: "order",
+    notification_type,
     order_id,
   });
 
@@ -47,7 +48,7 @@ const createOrderNotification = async (
     rider_id,
     title,
     content: contentRider,
-    notification_type: "order",
+    notification_type,
     order_id,
   });
 
@@ -116,12 +117,13 @@ const orderCtrl = {
       admin.orders.push(newOrder._id);
       await admin.save();
 
-      createOrderNotification(
+      createNotification(
         user_id,
         order_id,
         "Order Creation",
         `You have created a new order with order id ${order_id}`,
         `You have received a new order with order id ${order_id}`,
+        "order",
         rider_id
       );
       return res.status(201).json({ ...newOrder._doc, status: "successful" });
@@ -168,12 +170,13 @@ const orderCtrl = {
       const user_id = foundOrder.user_id;
       await foundOrder.save();
 
-      createOrderNotification(
+      createNotification(
         user_id,
         order_id,
         "Order Accepted",
         `Your order ${order_id} has been accepted`,
         `You have accepted a new order with order id ${order_id}`,
+        "order",
         rider_id
       );
       return res.status(200).json({ message: "order accepted" });
@@ -192,12 +195,13 @@ const orderCtrl = {
       const user_id = foundOrder.user_id;
       await foundOrder.save();
 
-      createOrderNotification(
+      createNotification(
         user_id,
         order_id,
         "Order Declined",
         `Your order ${order_id} has been declined. Please choose another rider`,
         `You have declined order with order id ${order_id}`,
+        "order",
         rider_id
       );
       return res.status(200).json({ message: "order declined" });
@@ -212,12 +216,13 @@ const orderCtrl = {
       const foundOrder = await Order.findOne({ order_id });
       foundOrder.rider_id = rider_id;
       await foundOrder.save();
-      createOrderNotification(
+      createNotification(
         req.user.id,
         order_id,
         "Rider Changed",
         `Your rider for order ${order_id} has been changed.`,
         `You have received a new order with order id ${order_id}`,
+        "order",
         rider_id
       );
       res.status(200).json({ message: "rider changed successfully" });

@@ -81,25 +81,20 @@ let dates = {
 const otpCtrl = {
   otpEmail: async (req, res, next) => {
     try {
-      const { email, type } = req.body;
+      const { email, role } = req.body;
       let email_subject, email_message;
       if (!email) {
         const response = { Status: "Failure", Details: "Email not provided" };
         return res.status(400).send(response);
       }
-      if (!type) {
-        const response = { Status: "Failure", Details: "Type not provided" };
+      if (!role) {
+        const response = { Status: "Failure", Details: "Role not provided" };
         return res.status(400).send(response);
       }
-      const foundUser = await User.findOne({ email: email });
-      if (!foundUser) {
-        return res
-          .status(400)
-          .send({ Status: "Failure", Details: "Email not registered" });
-      }
+      
       const otp = otpGenerator.generate(6, {
-        alphabets: false,
-        upperCase: false,
+        lowerCaseAlphabets: false,
+        upperCaseAlphabets: false,
         specialChars: false,
       });
       const now = new Date();
@@ -121,24 +116,8 @@ const otpCtrl = {
 
       const encoded = encode(JSON.stringify(details));
 
-      if (type) {
-        if (type == "VERIFICATION") {
-          email_message = message_vf(otp);
-          email_subject = subject_mail_vf;
-        } else if (type == "FORGET") {
-          email_message = message_f(otp);
-          email_subject = subject_mail_f;
-        } else if (type == "2FA") {
-          email_message = message_2fa(otp);
-          email_subject = subject_mail_2fa;
-        } else {
-          const response = {
-            Status: "Failure",
-            Details: "Incorrect Type Provided",
-          };
-          return res.status(400).send(response);
-        }
-      }
+      email_message = message_vf(otp);
+      email_subject = subject_mail_vf;
 
       console.log(email_subject);
 
@@ -167,6 +146,18 @@ const otpCtrl = {
 
       console.log("After transporter verification");
 
+      if (role.toLowerCase() === "user") {
+        const newUser = new User({
+          email: email,
+        });
+        await newUser.save();
+      } else if (role.toLowerCase() === "rider") {
+        const newRider = new Rider({
+          email: email,
+        });
+        await newRider.save();
+      }
+
       let statusCode;
       let resp;
 
@@ -190,7 +181,7 @@ const otpCtrl = {
   },
   otpPhone: async (req, res, next) => {
     try {
-      const { phone_number, type, role } = req.body;
+      const { phone_number, role } = req.body;
 
       let phone_message;
 
@@ -202,8 +193,11 @@ const otpCtrl = {
         return res.status(400).send(response);
       }
 
-      if (!type) {
-        const response = { Status: "Failure", Details: "Type not provided" };
+      if (!role) {
+        const response = {
+          Status: "Failure",
+          Details: "Role not provided",
+        };
         return res.status(400).send(response);
       }
 
@@ -234,32 +228,15 @@ const otpCtrl = {
 
       const encoded = encode(JSON.stringify(details));
 
-      if (type) {
-        if (type == "VERIFICATION") {
-          phone_message = message_pvf(otp);
-        } else if (type == "FORGET") {
-          phone_message = message_pf(otp);
-        } else if (type == "2FA") {
-          phone_message = message_p2fa(otp);
-        } else {
-          const response = {
-            Status: "Failure",
-            Details: "Incorrect Type Provided",
-          };
-          return res.status(400).send(response);
-        }
-      }
+      phone_message = message_pvf(otp);
 
-      // let params = {
-      //   Message: phone_message,
-      //   PhoneNumber: phone_number,
-      // };
+      const len = phone_number.toString().length;
       const accountSid = process.env.ACCOUNT_SID;
       const authTokenTwilio = process.env.AUTH_TOKEN_TWILIO;
       const client = twilio(accountSid, authTokenTwilio);
       const newNumber = new PhoneNumber({
-        country_code: parseInt(phone_number.toString().substring(0, 3)),
-        number: parseInt(phone_number.toString().substring(3)),
+        country_code: parseInt(phone_number.toString().substring(0, len-10)),
+        number: parseInt(phone_number.toString().substring(len-10)),
       });
       await newNumber.save();
       if (role.toLowerCase() === "user") {

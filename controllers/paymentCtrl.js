@@ -163,6 +163,35 @@ const getPaymentLink = async (amount, currency, email, phone_number, name) => {
   }
 };
 
+const createNotification = async (
+  user_id,
+  order_id,
+  title,
+  contentUser,
+  contentRider,
+  notification_type,
+  rider_id
+) => {
+  if (!order_id) order_id = "N/A";
+  const userNot = await NotificationUser.create({
+    user_id,
+    title,
+    content: contentUser,
+    notification_type,
+    order_id,
+  });
+
+  const riderNot = await NotificationRider.create({
+    rider_id,
+    title,
+    content: contentRider,
+    notification_type,
+    order_id,
+  });
+
+  return [userNot, riderNot];
+};
+
 const paymentCtrl = {
   payFundWallet: async (req, res) => {
     try {
@@ -263,6 +292,15 @@ const paymentCtrl = {
       if (!order.paid) order.paid = true;
       await order.save();
       await wallet.save();
+      createNotification(
+        userId,
+        order_id,
+        `Payment Complete`,
+        `You have paid for order ${order_id} with wallet`,
+        `The user has paid for order ${order_id}`,
+        "order payment",
+        order.rider_id
+      );
       return res.status(200).json({ message: "Payment successful" });
     } catch (err) {
       console.log(err);
@@ -287,6 +325,18 @@ const paymentCtrl = {
         confirmPayment(transaction_id);
       const user = await User.findOne({ email: customer.email });
       await createTransaction(user._id, id, status, currency, amount, customer);
+      const transaction = await Transaction.findOne({
+        transactionId: id,
+      })
+      createNotification(
+        user._id,
+        transaction.orderId,
+        `Payment Complete`,
+        `You have paid for order ${order_id} with card`,
+        `The user has paid for order ${order_id}`,
+        "order payment",
+        order.rider_id
+      );
       return res.status(200).json({
         response: "Payment successful",
       });
@@ -310,6 +360,20 @@ const paymentCtrl = {
         currency,
         amount,
         customer
+      );
+
+      const transaction = await Transaction.findOne({
+        transactionId: id,
+      });
+
+      createNotification(
+        user._id,
+        transaction.orderId,
+        `Payment Complete`,
+        `You have paid for order ${order_id} with card`,
+        `The user has paid for order ${order_id}`,
+        "order payment",
+        order.rider_id
       );
 
       return res.status(200).json({
