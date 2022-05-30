@@ -117,7 +117,7 @@ const orderCtrl = {
       admin.orders.push(newOrder._id);
       await admin.save();
 
-      createNotification(
+      await createNotification(
         user_id,
         order_id,
         "Order Creation",
@@ -170,7 +170,7 @@ const orderCtrl = {
       const user_id = foundOrder.user_id;
       await foundOrder.save();
 
-      createNotification(
+      await createNotification(
         user_id,
         order_id,
         "Order Accepted",
@@ -195,7 +195,7 @@ const orderCtrl = {
       const user_id = foundOrder.user_id;
       await foundOrder.save();
 
-      createNotification(
+      await createNotification(
         user_id,
         order_id,
         "Order Declined",
@@ -216,7 +216,7 @@ const orderCtrl = {
       const foundOrder = await Order.findOne({ order_id });
       foundOrder.rider_id = rider_id;
       await foundOrder.save();
-      createNotification(
+      await createNotification(
         req.user.id,
         order_id,
         "Rider Changed",

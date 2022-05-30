@@ -6,6 +6,8 @@ import path from "path";
 import helmet from "helmet";
 import logger from "morgan";
 import cors from "cors";
+import swaggerUI from "swagger-ui-express";
+import docs from "./docs/index.js";
 import userRouter from "./routers/userRouter.js";
 import riderRouter from "./routers/riderRouter.js";
 import otpRouter from "./routers/otpRouter.js";
@@ -42,8 +44,9 @@ app.use(otpRouter);
 app.use(paymentRouter);
 app.use(orderRouter);
 app.use(adminRouter);
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(docs));
 
-const PORT = 5000 || process.env.PORT;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   dbConnection();

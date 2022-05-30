@@ -19,7 +19,7 @@ paymentRouter
 
 paymentRouter
   .route("/api/v1/payments/with_wallet/confirm")
-  .post(authToken, paymentCtrl.confirmPaymentWithWallet);
+  .post(paymentCtrl.confirmPaymentWithWallet);
 
 paymentRouter
   .route("/api/v1/payments/fund_wallet/confirm")

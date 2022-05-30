@@ -1,3 +1,5 @@
+import os from "os";
+import url from "url";
 import User from "../models/User.js";
 import NotificationUser from "../models/NotificationUser.js";
 import PhoneNumber from "../models/PhoneNumber.js";
@@ -166,6 +168,9 @@ const userCtrl = {
     if (!foundUser) return res.status(404).json("User not found!");
     const { password, createdAt, updatedAt, ...others } = foundUser._doc;
     console.log(others);
+    const path = url.parse(req.url).path;
+    console.log(path);
+    console.log(req.headers.host);
     res.status(200).json(others);
   },
   getPendingOrders: async (req, res) => {
