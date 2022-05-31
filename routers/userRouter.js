@@ -1,24 +1,22 @@
 import userCtrl from "../controllers/userCtrl.js";
+import otpCtrl from "../controllers/otpCtrl.js";
 import { authToken, authOTPVerified } from "./auth.js";
 
 import express from "express";
 
 const userRouter = express.Router();
 
-userRouter.route("/api/v1/users").get(authToken, (req, res) => {
-  res.send("User test is successful");
-});
-
-// userRouter.route("/api/v1/users/register").post(userCtrl.register);
+userRouter.route("/api/v1/users/otp/phone").post(otpCtrl.otpPhone);
+userRouter.route("/api/v1/users/otp/verify").post(otpCtrl.verifyOtp);
 userRouter
   .route("/api/v1/users/set_password")
-  .post(authOTPVerified, userCtrl.setPassword);
+  .post(authToken, userCtrl.setPassword);
 userRouter
   .route("/api/v1/users/add_personal_info")
-  .post(authOTPVerified, userCtrl.addPersonalInfo);
+  .post(authToken, userCtrl.addPersonalInfo);
 userRouter
   .route("/api/v1/users/add_delivery_location")
-  .post(authOTPVerified, userCtrl.addDeliveryLocation);
+  .post(authToken, userCtrl.addDeliveryLocation);
 userRouter.route("/api/v1/users/login").post(userCtrl.login);
 userRouter.route("/api/v1/users/logout").post(userCtrl.logout);
 

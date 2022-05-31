@@ -10,35 +10,35 @@ import jwt from "jsonwebtoken";
 const userCtrl = {
   setPassword: async (req, res) => {
     try {
-      const phone_number = req.body.phone_number;
-      console.log(parseInt(phone_number.toString().substring(3)));
-      const foundNumber = await PhoneNumber.findOne({
-        number: parseInt(phone_number.toString().substring(3)),
-      });
-      console.log(foundNumber);
+      const password = req.body.password;
+      // console.log(parseInt(phone_number.toString().substring(3)));
+      // const foundNumber = await PhoneNumber.findOne({
+      //   number: parseInt(phone_number.toString().substring(3)),
+      // });
+
       const foundUser = await User.findOne({
-        phone_number: foundNumber._id,
+        _id: req.user.id,
       });
       if (!foundUser.password) {
         foundUser.password = CryptoJS.AES.encrypt(
-          req.body.password,
+          password,
           process.env.SECRET_PASSPHRASE
         ).toString();
 
         await foundUser.save();
 
-        const accessToken = jwt.sign(
-          {
-            id: foundUser._id,
-          },
-          process.env.JWT_SECRET,
-          { expiresIn: "3d" }
-        );
-        res.cookie("userToken", accessToken, {
-          maxAge: 3 * 24 * 60 * 60 * 1000,
-          httpOnly: true,
-        });
-        return res.status(201).json({ accessToken });
+        // const accessToken = jwt.sign(
+        //   {
+        //     id: foundUser._id,
+        //   },
+        //   process.env.JWT_SECRET,
+        //   { expiresIn: "3d" }
+        // );
+        // res.cookie("userToken", accessToken, {
+        //   maxAge: 3 * 24 * 60 * 60 * 1000,
+        //   httpOnly: true,
+        // });
+        return res.status(200).json({ message: "Password set successfully" });
       } else {
         return res
           .status(400)
@@ -50,82 +50,54 @@ const userCtrl = {
     }
   },
   addPersonalInfo: async (req, res) => {
-    const { first_name, last_name, email, phone_number } = req.body;
-    const foundNumber = await PhoneNumber.findOne({
-      number: parseInt(phone_number.toString().substring(3)),
-    });
-    const foundUser = await User.findOne({
-      phone_number: foundNumber._id,
-    });
-    foundUser.first_name = first_name;
-    foundUser.last_name = last_name;
-    foundUser.email = email;
+    try {
+      const { first_name, last_name, email } = req.body;
+      // const foundNumber = await PhoneNumber.findOne({
+      //   number: parseInt(phone_number.toString().substring(3)),
+      // });
+      const foundUser = await User.findOne({
+        _id: req.user.id,
+      });
+      foundUser.first_name = first_name;
+      foundUser.last_name = last_name;
+      foundUser.email = email;
 
-    await foundUser.save();
+      await foundUser.save();
 
-    res.status(200).json({
-      first_name,
-      last_name,
-      email,
-      phone_number,
-      message: "Personal Info added successfully",
-    });
+      res.status(200).json({
+        message: "Personal Info added successfully",
+      });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json(err);
+    }
   },
   addDeliveryLocation: async (req, res) => {
-    const { location_id, name, longitude, latitude, phone_number } = req.body;
-    const type = "delivery";
-    const foundNumber = await PhoneNumber.findOne({
-      number: parseInt(phone_number.toString().substring(3)),
-    });
-    const foundUser = await User.findOne({
-      phone_number: foundNumber._id,
-    });
-    const loc = await LocationCol.create({
-      location_id,
-      name,
-      longitude,
-      latitude,
-    });
-    foundUser.current_location = loc._id;
-    await foundUser.save();
-
-    res.status(200).json({
-      location_id,
-      name,
-      longitude,
-      latitude,
-      message: "Delivery Location added successfully",
-    });
-  },
-  register: async (req, res) => {
-    const newUser = new User({
-      username: req.body.username,
-      email: req.body.email,
-      phone_number: req.body.phone_number,
-      password: CryptoJS.AES.encrypt(
-        req.body.password,
-        process.env.SECRET_PASSPHRASE
-      ).toString(),
-    });
-
     try {
-      const savedUser = await newUser.save();
-      const accessToken = jwt.sign(
-        {
-          id: savedUser._id,
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: "3d" }
-      );
-      res.cookie("userToken", accessToken, {
-        maxAge: 3 * 24 * 60 * 60 * 1000,
-        httpOnly: true,
+      const { location_id, name, longitude, latitude } = req.body;
+      const type = "delivery";
+      // const foundNumber = await PhoneNumber.findOne({
+      //   number: parseInt(phone_number.toString().substring(3)),
+      // });
+      const foundUser = await User.findOne({
+        _id: req.user.id,
       });
-      // const { password, ...others } = savedUser._doc;
-      res.status(201).json({ accessToken });
-    } catch (e) {
-      console.log(e);
-      res.status(500).json(e);
+      const loc = await LocationCol.create({
+        location_id,
+        type,
+        name,
+        longitude,
+        latitude,
+      });
+      foundUser.current_location = loc._id;
+      await foundUser.save();
+
+      res.status(200).json({
+        message: "Delivery Location added successfully",
+      });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json(err);
     }
   },
   login: async (req, res) => {
@@ -149,7 +121,8 @@ const userCtrl = {
         httpOnly: true,
       });
       // const { password, ...others } = user._doc;
-      if (psw !== req.body.password) res.status(401).json("Wrong password");
+      if (psw !== req.body.password)
+        res.status(401).json({ message: "Wrong password" });
       else res.status(200).json({ accessToken });
     } catch (e) {
       console.log(e);
@@ -158,14 +131,14 @@ const userCtrl = {
   },
   logout: (req, res) => {
     res.clearCookie("userToken");
-    res.json("Successfully logged out");
+    res.json({ message: "Successfully logged out" });
   },
   getUser: async (req, res) => {
     let foundUser;
     if (req.user) {
       foundUser = await User.findById(req.user.id);
     }
-    if (!foundUser) return res.status(404).json("User not found!");
+    if (!foundUser) return res.status(404).json({ message: "User not found!" });
     const { password, createdAt, updatedAt, ...others } = foundUser._doc;
     console.log(others);
     const path = url.parse(req.url).path;

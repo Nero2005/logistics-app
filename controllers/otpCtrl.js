@@ -1,4 +1,5 @@
 import "dotenv/config";
+import url from "url";
 import { OTP } from "../sequelize.js";
 import { encode, decode } from "../middlewares/crypt.js";
 import otpGenerator from "otp-generator";
@@ -81,17 +82,14 @@ let dates = {
 const otpCtrl = {
   otpEmail: async (req, res, next) => {
     try {
-      const { email, role } = req.body;
+      const { email } = req.body;
+      const path = url.parse(req.url).path;
       let email_subject, email_message;
       if (!email) {
         const response = { Status: "Failure", Details: "Email not provided" };
         return res.status(400).send(response);
       }
-      if (!role) {
-        const response = { Status: "Failure", Details: "Role not provided" };
-        return res.status(400).send(response);
-      }
-      
+
       const otp = otpGenerator.generate(6, {
         lowerCaseAlphabets: false,
         upperCaseAlphabets: false,
@@ -146,12 +144,12 @@ const otpCtrl = {
 
       console.log("After transporter verification");
 
-      if (role.toLowerCase() === "user") {
+      if (path == "/api/v1/users/otp/email") {
         const newUser = new User({
           email: email,
         });
         await newUser.save();
-      } else if (role.toLowerCase() === "rider") {
+      } else if (path == "/api/v1/riders/otp/email") {
         const newRider = new Rider({
           email: email,
         });
@@ -181,7 +179,8 @@ const otpCtrl = {
   },
   otpPhone: async (req, res, next) => {
     try {
-      const { phone_number, role } = req.body;
+      const { phone_number } = req.body;
+      const path = url.parse(req.url).path;
 
       let phone_message;
 
@@ -189,14 +188,6 @@ const otpCtrl = {
         const response = {
           Status: "Failure",
           Details: "Phone Number not provided",
-        };
-        return res.status(400).send(response);
-      }
-
-      if (!role) {
-        const response = {
-          Status: "Failure",
-          Details: "Role not provided",
         };
         return res.status(400).send(response);
       }
@@ -235,16 +226,16 @@ const otpCtrl = {
       const authTokenTwilio = process.env.AUTH_TOKEN_TWILIO;
       const client = twilio(accountSid, authTokenTwilio);
       const newNumber = new PhoneNumber({
-        country_code: parseInt(phone_number.toString().substring(0, len-10)),
-        number: parseInt(phone_number.toString().substring(len-10)),
+        country_code: parseInt(phone_number.toString().substring(0, len - 10)),
+        number: parseInt(phone_number.toString().substring(len - 10)),
       });
       await newNumber.save();
-      if (role.toLowerCase() === "user") {
+      if (path == "/api/v1/users/otp/phone") {
         const newUser = new User({
           phone_number: newNumber._id,
         });
         await newUser.save();
-      } else if (role.toLowerCase() === "rider") {
+      } else if (path == "/api/v1/riders/otp/phone") {
         const newRider = new Rider({
           phone_number: newNumber._id,
         });
@@ -270,7 +261,8 @@ const otpCtrl = {
       var currentdate = new Date();
       console.log(currentdate.getHours());
       console.log(currentdate);
-      const { verification_key, otp, check, role } = req.body;
+      const { verification_key, otp, check } = req.body;
+      const path = url.parse(req.url).path;
 
       if (!verification_key) {
         const response = {
@@ -329,23 +321,49 @@ const otpCtrl = {
               const foundNumber = await PhoneNumber.findOne({
                 number: parseInt(check_obj.toString().substring(3)),
               });
-              if (role.toLowerCase() === "user") {
+
+              let accessToken;
+              if (path == "/api/v1/users/otp/verify") {
                 const foundUser = await User.findOne({
                   phone_number: foundNumber._id,
                 });
                 foundUser.otp_verified = true;
                 await foundUser.save();
-              } else if (role.toLowerCase() === "rider") {
+                accessToken = jwt.sign(
+                  {
+                    id: foundUser._id,
+                  },
+                  process.env.JWT_SECRET,
+                  { expiresIn: "3d" }
+                );
+                res.cookie("userToken", accessToken, {
+                  maxAge: 3 * 24 * 60 * 60 * 1000,
+                  httpOnly: true,
+                });
+              } else if (path == "/api/v1/riders/otp/verify") {
                 const foundRider = await Rider.findOne({
                   phone_number: foundNumber._id,
                 });
                 foundRider.otp_verified = true;
                 await foundRider.save();
+                accessToken = jwt.sign(
+                  {
+                    id: foundRider._id,
+                    isRider: true,
+                  },
+                  process.env.JWT_SECRET,
+                  { expiresIn: "3d" }
+                );
+                res.cookie("riderToken", accessToken, {
+                  maxAge: 3 * 24 * 60 * 60 * 1000,
+                  httpOnly: true,
+                });
               }
               const response = {
                 Status: "Success",
                 Details: "OTP Matched",
                 Check: check,
+                accessToken,
               };
               return res.status(200).send(response);
             } else {
