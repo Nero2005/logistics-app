@@ -19,5 +19,6 @@ Create a .env file with the following keys:
   - TWILIO_PHONE_NUMBER=get twilio phone number from account
   - FLW_SECRET_KEY=create a flutterwave account and get a secret from settings
   - SERVER_HOST, host for backend, like http://localhost:5000
+  - HOME_PAGE, url for frontend home page
 
 Run `npm run dev`
