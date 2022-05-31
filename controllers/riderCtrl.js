@@ -9,121 +9,119 @@ import PhoneNumber from "../models/PhoneNumber.js";
 
 const riderCtrl = {
   setPassword: async (req, res) => {
-    const phone_number = req.body.phone_number;
-    const foundNumber = await PhoneNumber.findOne({
-      number: parseInt(phone_number.toString().substring(3)),
-    });
-    const foundRider = await Rider.findOne({
-      phone_number: foundNumber._id,
-    });
-    if (!foundRider.password) {
-      foundRider.password = CryptoJS.AES.encrypt(
-        req.body.password,
-        process.env.SECRET_PASSPHRASE
-      ).toString();
-
-      await foundRider.save();
-
-      const accessToken = jwt.sign(
-        {
-          id: foundRider._id,
-          isRider: true,
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: "3d" }
-      );
-      res.cookie("riderToken", accessToken, {
-        maxAge: 3 * 24 * 60 * 60 * 1000,
-        httpOnly: true,
+    try {
+      const password = req.body.password;
+      // const foundNumber = await PhoneNumber.findOne({
+      //   number: parseInt(phone_number.toString().substring(3)),
+      // });
+      const foundRider = await Rider.findOne({
+        _id: req.user.id,
       });
-      return res.status(201).json({ accessToken });
-    } else {
-      return res
-        .status(400)
-        .json({ Message: "You have already set the password" });
+      if (!foundRider.password) {
+        foundRider.password = CryptoJS.AES.encrypt(
+          password,
+          process.env.SECRET_PASSPHRASE
+        ).toString();
+
+        await foundRider.save();
+
+        return res.status(200).json({ message: "Password set successfully" });
+      } else {
+        return res
+          .status(400)
+          .json({ Message: "You have already set the password" });
+      }
+    } catch (err) {
+      console.log(err);
+      res.status(500).json(err);
     }
   },
   addPersonalInfo: async (req, res) => {
-    const { first_name, last_name, email, phone_number } = req.body;
-    const foundNumber = await PhoneNumber.findOne({
-      number: parseInt(phone_number.toString().substring(3)),
-    });
-    const foundRider = await Rider.findOne({
-      phone_number: foundNumber._id,
-    });
-    foundRider.first_name = first_name;
-    foundRider.last_name = last_name;
-    foundRider.email = email;
+    try {
+      const { first_name, last_name, email } = req.body;
+      // const foundNumber = await PhoneNumber.findOne({
+      //   number: parseInt(phone_number.toString().substring(3)),
+      // });
+      const foundRider = await Rider.findOne({
+        _id: req.user.id,
+      });
+      foundRider.first_name = first_name;
+      foundRider.last_name = last_name;
+      foundRider.email = email;
 
-    await foundRider.save();
+      await foundRider.save();
 
-    res.status(200).json({
-      first_name,
-      last_name,
-      email,
-      phone_number,
-      message: "Personal Info added successfully",
-    });
+      res.status(200).json({
+        message: "Personal Info added successfully",
+      });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json(err);
+    }
   },
   addBikeDetails: async (req, res) => {
-    const { vehicle_type, plate_number, phone_number } = req.body;
-    const foundNumber = await PhoneNumber.findOne({
-      number: parseInt(phone_number.toString().substring(3)),
-    });
-    const foundRider = await Rider.findOne({
-      phone_number: foundNumber._id,
-    });
-    foundRider.vehicle_type = vehicle_type;
-    foundRider.plate_number = plate_number;
+    try {
+      const { vehicle_type, plate_number } = req.body;
+      // const foundNumber = await PhoneNumber.findOne({
+      //   number: parseInt(phone_number.toString().substring(3)),
+      // });
+      const foundRider = await Rider.findOne({
+        _id: req.user.id,
+      });
+      foundRider.vehicle_type = vehicle_type;
+      foundRider.plate_number = plate_number;
 
-    await foundRider.save();
+      await foundRider.save();
 
-    const admin = await Company.findOne();
-    if (admin.riders.indexOf(foundRider._id) > -1) {
-      admin.riders.push(foundRider._id);
+      const admin = await Company.findOne();
+      if (admin.riders.indexOf(foundRider._id) > -1) {
+        admin.riders.push(foundRider._id);
+      }
+
+      res.status(200).json({
+        message: "Bike details added successfully",
+      });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json(err);
     }
-
-    res.status(200).json({
-      vehicle_type,
-      plate_number,
-      phone_number,
-      message: "Bike details added successfully",
-    });
   },
   addDeliveryLocation: async (req, res) => {
-    const { location_id, name, longitude, latitude, phone_number } = req.body;
-    const type = "delivery";
-    const foundNumber = await PhoneNumber.findOne({
-      number: parseInt(phone_number.toString().substring(3)),
-    });
-    const foundRider = await Rider.findOne({
-      phone_number: foundNumber._id,
-    });
-    const loc = await LocationCol.create({
-      location_id,
-      name,
-      longitude,
-      latitude,
-    });
-    foundRider.current_location = loc._id;
-    await foundRider.save();
+    try {
+      const { location_id, name, longitude, latitude } = req.body;
+      const type = "delivery";
+      // const foundNumber = await PhoneNumber.findOne({
+      //   number: parseInt(phone_number.toString().substring(3)),
+      // });
+      const foundRider = await Rider.findOne({
+        _id: req.user.id
+      });
+      const loc = await LocationCol.create({
+        location_id,
+        name,
+        longitude,
+        latitude,
+        type,
+      });
+      foundRider.current_location = loc._id;
+      await foundRider.save();
 
-    res.status(200).json({
-      location_id,
-      name,
-      longitude,
-      latitude,
-      message: "Delivery Location added successfully",
-    });
+      res.status(200).json({
+        message: "Delivery Location added successfully",
+      });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json(err);
+    }
   },
   setStatus: async (req, res) => {
     try {
-      const { rider_status, phone_number } = req.body;
-      const foundNumber = await PhoneNumber.findOne({
-        number: parseInt(phone_number.toString().substring(3)),
-      });
+      const { rider_status } = req.body;
+      // const foundNumber = await PhoneNumber.findOne({
+      //   number: parseInt(phone_number.toString().substring(3)),
+      // });
       const foundRider = await Rider.findOne({
-        phone_number: foundNumber._id,
+        // phone_number: foundNumber._id,
       });
       foundRider.active = rider_status;
       await foundRider.save();
