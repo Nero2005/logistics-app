@@ -2,7 +2,7 @@ export default {
   post: {
     tags: ["User operations"], // operation's tag.
     description: "Send an OTP", // operation's desc.
-    operationId: "sendOtp", // unique operation id
+    operationId: "sendOtpUser", // unique operation id
     parameters: [
       // expected params.
       {
