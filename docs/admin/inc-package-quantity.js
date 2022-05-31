@@ -1,60 +1,53 @@
 export default {
   post: {
-    tags: ["User operations"], // operation's tag.
-    description: "Add User Personal Info", // operation's desc.
-    operationId: "addPersonalInfo", // unique operation id
+    tags: ["Admin operations"], // operation's tag.
+    description: "Increase Package Quantity", // operation's desc.
+    operationId: "incPackageQuantity", // unique operation id
     parameters: [
       // expected params.
       {
-        name: "first_name", // name of the param
+        name: "quantity", // name of the param
         in: "body", // location of the param
         schema: {
-          type: "String",
-          example: "Oghenero",
+          type: "Number",
+          example: "10",
         },
         required: true, // Mandatory param
-        description: "First name user provided", // param desc.
+        description: "amount to increase quantity of package available", // param desc.
       },
       {
-        name: "last_name", // name of the param
+        name: "package_id", // name of the param
         in: "body", // location of the param
         schema: {
-          type: "String",
-          example: "Ologe",
+          $ref: "#/components/schemas/_id",
         },
         required: true, // Mandatory param
-        description: "Last name user provided", // param desc.
-      },
-      {
-        name: "email", // name of the param
-        in: "body", // location of the param
-        schema: {
-          type: "String",
-          example: "example@gmail.com",
-        },
-        required: true, // Mandatory param
-        description: "Email user provided", // param desc.
+        description: "package _id", // param desc.
       },
     ],
     // expected responses
     responses: {
       // response code
-      200: {
-        description: "Personal Info added successfully", // response desc.
+      201: {
+        description: "Package created successfully", // response desc.
         content: {
           // content-type
           "application/json": {
             schema: {
+              quantity: {
+                type: "Number",
+                example: "20",
+              },
               message: {
                 type: "String",
-                example: "Personal info added successfully",
+                example: "successful",
               },
             },
           },
         },
       },
       401: {
-        description: "User not authenticated", // response desc.
+        description: "Admin not authenticated", // response desc.
         content: {
           // content-type
           "application/json": {
@@ -66,7 +59,7 @@ export default {
       },
       // response code
       500: {
-        description: "Error adding personal info", // response desc.
+        description: "Error increasing package quantity", // response desc.
         content: {
           // content-type
           "application/json": {

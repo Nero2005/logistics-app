@@ -13,6 +13,7 @@ export default {
           // content-type
           "application/json": {
             schema: {
+              type: "Array",
               $ref: "#/components/schemas/NotificationRider", // user data model
             },
           },

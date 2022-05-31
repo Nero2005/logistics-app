@@ -94,7 +94,7 @@ const riderCtrl = {
       //   number: parseInt(phone_number.toString().substring(3)),
       // });
       const foundRider = await Rider.findOne({
-        _id: req.user.id
+        _id: req.user.id,
       });
       const loc = await LocationCol.create({
         location_id,
@@ -204,6 +204,13 @@ const riderCtrl = {
     });
     res.status(200).json(pendingOrders);
   },
+  getDeliveredOrders: async (req, res) => {
+    const deliveredOrders = await Order.find({
+      delivered: true,
+      rider_id: req.user.id,
+    });
+    res.status(200).json(deliveredOrders);
+  },
   getRiders: async (req, res) => {
     const riders = await Rider.find({ active: true });
     res.status(200).json(riders);
@@ -220,9 +227,7 @@ const riderCtrl = {
         admin.riders.splice(indexR, 1);
         await admin.save();
       }
-      return res
-        .status(200)
-        .json({ ...deletedRider, message: "Rider removed successfully" });
+      return res.status(200).json({ message: "Rider removed successfully" });
     } catch (err) {
       console.log(err);
       res.status(500).json(err);

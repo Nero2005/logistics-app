@@ -1,8 +1,8 @@
 export default {
   get: {
-    tags: ["User operations"], // operation's tag.
+    tags: ["Admin operations"], // operation's tag.
     description: "Get Riders", // operation's desc.
-    operationId: "getRiders", // unique operation id
+    operationId: "getRidersAdmin", // unique operation id
     parameters: [],
     // expected responses
     responses: {

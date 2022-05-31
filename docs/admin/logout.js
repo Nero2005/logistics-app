@@ -1,8 +1,8 @@
 export default {
   post: {
-    tags: ["Rider operations"], // operation's tag.
-    description: "Rider Logout", // operation's desc.
-    operationId: "logoutRider", // unique operation id
+    tags: ["Admin operations"], // operation's tag.
+    description: "Admin Logout", // operation's desc.
+    operationId: "logoutAdmin", // unique operation id
     parameters: [],
     // expected responses
     responses: {
@@ -15,7 +15,7 @@ export default {
             schema: {
               message: {
                 type: "String",
-                example: "Successfully logged out",
+                content: "Successfully logged out",
               },
             },
           },

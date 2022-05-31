@@ -25,10 +25,9 @@ export default {
           // content-type
           "application/json": {
             schema: {
-              accessToken: {
+              message: {
                 type: "String",
-                description:
-                  "A unique access token for user, saved in cookies with expiration time 3d",
+                example: "Password set successfully",
               },
             },
           },

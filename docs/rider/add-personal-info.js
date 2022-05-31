@@ -47,7 +47,7 @@ export default {
             schema: {
               message: {
                 type: "String",
-                content: "Personal info added successfully",
+                example: "Personal info added successfully",
               },
             },
           },

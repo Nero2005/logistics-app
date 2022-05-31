@@ -157,7 +157,7 @@ const getPaymentLink = async (amount, currency, email, phone_number, name, redir
       })
       .json();
     console.log(response);
-    return response;
+    return response.data.link;
     // res.redirect(response.data.link);
   } catch (err) {
     console.log(err);
@@ -199,7 +199,7 @@ const paymentCtrl = {
     try {
       const { amount, currency, email, phone_number, name } = req.body;
       const redirect_url = `${process.env.SERVER_HOST}/api/v1/payments/fund_wallet/confirm`;
-      const response = await getPaymentLink(
+      const link = await getPaymentLink(
         amount,
         currency,
         email,
@@ -207,7 +207,7 @@ const paymentCtrl = {
         name,
         redirect_url
       );
-      res.json(response);
+      res.status(200).json(link);
     } catch (err) {
       console.log(err);
       res.status(500).json(err);
@@ -219,7 +219,7 @@ const paymentCtrl = {
       const order = await Order.findOne({ order_id: order_id });
       const amount = order.price;
       const redirect_url = `${process.env.SERVER_HOST}/api/v1/payments/with_card/confirm`;
-      const response = await getPaymentLink(
+      const link = await getPaymentLink(
         amount,
         currency,
         email,
@@ -227,7 +227,7 @@ const paymentCtrl = {
         name,
         redirect_url
       );
-      res.json(response);
+      res.status(200).json(link);
     } catch (err) {
       console.log(err);
       res.status(500).json(err);

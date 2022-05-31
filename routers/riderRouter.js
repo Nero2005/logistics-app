@@ -43,6 +43,10 @@ riderRouter
   .get(authRiderToken, riderCtrl.getPendingOrders);
 
 riderRouter
+  .route("/api/v1/riders/get_delivered_orders")
+  .get(authRiderToken, riderCtrl.getDeliveredOrders);
+
+riderRouter
   .route("/api/v1/riders/get_notifications")
   .get(authRiderToken, riderCtrl.getNotifications);
 

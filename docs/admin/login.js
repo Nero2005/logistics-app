@@ -1,30 +1,10 @@
 export default {
   post: {
-    tags: ["User operations"], // operation's tag.
-    description: "Add User Personal Info", // operation's desc.
-    operationId: "addPersonalInfo", // unique operation id
+    tags: ["Admin operations"], // operation's tag.
+    description: "Admin Login", // operation's desc.
+    operationId: "loginAdmin", // unique operation id
     parameters: [
       // expected params.
-      {
-        name: "first_name", // name of the param
-        in: "body", // location of the param
-        schema: {
-          type: "String",
-          example: "Oghenero",
-        },
-        required: true, // Mandatory param
-        description: "First name user provided", // param desc.
-      },
-      {
-        name: "last_name", // name of the param
-        in: "body", // location of the param
-        schema: {
-          type: "String",
-          example: "Ologe",
-        },
-        required: true, // Mandatory param
-        description: "Last name user provided", // param desc.
-      },
       {
         name: "email", // name of the param
         in: "body", // location of the param
@@ -33,28 +13,39 @@ export default {
           example: "example@gmail.com",
         },
         required: true, // Mandatory param
-        description: "Email user provided", // param desc.
+        description: "Email provided by user", // param desc.
+      },
+      {
+        name: "password", // name of the param
+        in: "body", // location of the param
+        schema: {
+          type: "String",
+          example: "password",
+        },
+        required: true, // Mandatory param
+        description: "Password provided by user", // param desc.
       },
     ],
     // expected responses
     responses: {
       // response code
       200: {
-        description: "Personal Info added successfully", // response desc.
+        description: "Login successful", // response desc.
         content: {
           // content-type
           "application/json": {
             schema: {
-              message: {
+              accessToken: {
                 type: "String",
-                example: "Personal info added successfully",
+                description:
+                  "A unique access token for user, saved in cookies with expiration time 3d",
               },
             },
           },
         },
       },
       401: {
-        description: "User not authenticated", // response desc.
+        description: "Wrong password", // response desc.
         content: {
           // content-type
           "application/json": {
@@ -66,7 +57,7 @@ export default {
       },
       // response code
       500: {
-        description: "Error adding personal info", // response desc.
+        description: "Error logging in", // response desc.
         content: {
           // content-type
           "application/json": {

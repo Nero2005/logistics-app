@@ -13,6 +13,8 @@ orderRouter.route("/api/v1/orders/get_packages").get(orderCtrl.getPackages);
 
 orderRouter.route("/api/v1/orders/get_package").get(orderCtrl.getPackage);
 
+orderRouter.route("/api/v1/orders/get_order").get(orderCtrl.getOrder);
+
 orderRouter.route("/api/v1/orders/get_location").get(orderCtrl.getLocation);
 
 orderRouter
@@ -30,5 +32,9 @@ orderRouter
 orderRouter
   .route("/api/v1/orders/picked_up_order")
   .post(authRiderToken, orderCtrl.pickedUp);
+
+orderRouter
+  .route("/api/v1/orders/delivered_order")
+  .post(authRiderToken, orderCtrl.deliveredOrder);
 
 export default orderRouter;
