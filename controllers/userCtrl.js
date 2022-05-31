@@ -153,6 +153,13 @@ const userCtrl = {
     });
     res.status(200).json(pendingOrders);
   },
+  getDeliveredOrders: async (req, res) => {
+    const deliveredOrders = await Order.find({
+      delivered: true,
+      user_id: req.user.id,
+    });
+    res.status(200).json(deliveredOrders);
+  },
   getNotifications: async (req, res) => {
     const user_id = req.user.id;
     const userNots = await NotificationUser.find({ user_id: user_id });

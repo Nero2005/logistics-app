@@ -1,60 +1,50 @@
 export default {
   post: {
-    tags: ["User operations"], // operation's tag.
-    description: "Add User Personal Info", // operation's desc.
-    operationId: "addPersonalInfo", // unique operation id
+    tags: ["Order operations", "User operations"], // operation's tag.
+    description: "Change Rider for Order", // operation's desc.
+    operationId: "changeRider", // unique operation id
     parameters: [
       // expected params.
       {
-        name: "first_name", // name of the param
+        name: "order_id", // name of the param
         in: "body", // location of the param
         schema: {
           type: "String",
-          example: "Oghenero",
+          example: "OO-27253",
         },
         required: true, // Mandatory param
-        description: "First name user provided", // param desc.
+        description: "Order id", // param desc.
       },
       {
-        name: "last_name", // name of the param
+        name: "rider_id", // name of the param
         in: "body", // location of the param
         schema: {
-          type: "String",
-          example: "Ologe",
+          $ref: "#/components/schemas/_id", // user data model
+          example: "6290b8a117bbcaf8b4df5788",
         },
         required: true, // Mandatory param
-        description: "Last name user provided", // param desc.
-      },
-      {
-        name: "email", // name of the param
-        in: "body", // location of the param
-        schema: {
-          type: "String",
-          example: "example@gmail.com",
-        },
-        required: true, // Mandatory param
-        description: "Email user provided", // param desc.
+        description: "Rider _id", // param desc.
       },
     ],
     // expected responses
     responses: {
       // response code
       200: {
-        description: "Personal Info added successfully", // response desc.
+        description: "Rider changed", // response desc.
         content: {
           // content-type
           "application/json": {
             schema: {
               message: {
                 type: "String",
-                example: "Personal info added successfully",
+                example: "rider changed successfully",
               },
             },
           },
         },
       },
       401: {
-        description: "User not authenticated", // response desc.
+        description: "Rider not authenticated", // response desc.
         content: {
           // content-type
           "application/json": {
@@ -66,7 +56,7 @@ export default {
       },
       // response code
       500: {
-        description: "Error adding personal info", // response desc.
+        description: "Error changing rider", // response desc.
         content: {
           // content-type
           "application/json": {

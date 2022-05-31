@@ -1,26 +1,37 @@
 export default {
   get: {
-    tags: ["User operations"], // operation's tag.
-    description: "Get Riders", // operation's desc.
-    operationId: "getRiders", // unique operation id
-    parameters: [],
+    tags: ["Order operations"], // operation's tag.
+    description: "Get Order", // operation's desc.
+    operationId: "getOrder", // unique operation id
+    parameters: [
+      // expected params.
+      {
+        name: "order_id", // name of the param
+        in: "body", // location of the param
+        schema: {
+          type: "String",
+          example: "OO-27253",
+        },
+        required: true, // Mandatory param
+        description: "Order id", // param desc.
+      },
+    ],
     // expected responses
     responses: {
       // response code
       200: {
-        description: "Riders found", // response desc.
+        description: "Order found", // response desc.
         content: {
           // content-type
           "application/json": {
             schema: {
-              type: "Array",
-              $ref: "#/components/schemas/Rider", // user data model
+              $ref: "#/components/schemas/Order", // user data model
             },
           },
         },
       },
       401: {
-        description: "Rider not authenticated", // response desc.
+        description: "User not authenticated", // response desc.
         content: {
           // content-type
           "application/json": {
@@ -32,7 +43,7 @@ export default {
       },
       // response code
       404: {
-        description: "Rider not found", // response desc.
+        description: "Order not found", // response desc.
         content: {
           // content-type
           "application/json": {

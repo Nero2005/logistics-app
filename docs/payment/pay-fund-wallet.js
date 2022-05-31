@@ -1,70 +1,80 @@
 export default {
   post: {
-    tags: ["Rider operations"], // operation's tag.
-    description: "Add Rider Delivery Location", // operation's desc.
-    operationId: "addPDeliveryLocation", // unique operation id
+    tags: ["Payment operations"], // operation's tag.
+    description: "Fund Wallet", // operation's desc.
+    operationId: "fundWallet", // unique operation id
     parameters: [
       // expected params.
       {
-        name: "location_id", // name of the param
+        name: "email", // name of the param
         in: "body", // location of the param
         schema: {
           type: "String",
-          example: "home",
+          example: "example@gmail.com",
         },
         required: true, // Mandatory param
-        description: "Location id created by rider", // param desc.
+        description: "User email: can be gotten from get_user route", // param desc.
       },
       {
-        name: "location_name", // name of the param
+        name: "currency", // name of the param
         in: "body", // location of the param
         schema: {
           type: "String",
-          example: "Home",
+          example: "NGN",
         },
         required: true, // Mandatory param
-        description: "Location name created by rider", // param desc.
+        description: "currency to pay", // param desc.
       },
       {
-        name: "longitude", // name of the param
+        name: "amount", // name of the param
         in: "body", // location of the param
         schema: {
-          type: "Double",
-          example: "3.209383",
+          type: "Number",
+          example: "15000",
         },
         required: true, // Mandatory param
-        description: "Location longitude", // param desc.
+        description: "Amount to fund wallet", // param desc.
       },
       {
-        name: "latitude", // name of the param
+        name: "name", // name of the param
         in: "body", // location of the param
         schema: {
-          type: "Double",
-          example: "6.104283",
+          type: "String",
+          example: "Oghenero Ologe",
         },
         required: true, // Mandatory param
-        description: "Location latitude", // param desc.
+        description: "name of user, can be gotten from get_user route", // param desc.
+      },
+      {
+        name: "phone_number", // name of the param
+        in: "body", // location of the param
+        schema: {
+          type: "Number",
+          example: "09033919392",
+        },
+        required: true, // Mandatory param
+        description: "User phone number, can be gotten from get_user route", // param desc.
       },
     ],
     // expected responses
     responses: {
       // response code
       200: {
-        description: "Delivery Location added successfully", // response desc.
+        description: "Flutterwave payment link", // response desc.
         content: {
           // content-type
           "application/json": {
             schema: {
-              message: {
+              link: {
                 type: "String",
-                example: "Delivery Location added successfully",
+                description: "Redirect to this link to let user pay"
               },
             },
           },
         },
       },
       401: {
-        description: "Rider not authenticated", // response desc.
+        description: "User not authenticated", // response desc.
         content: {
           // content-type
           "application/json": {
@@ -76,7 +86,7 @@ export default {
       },
       // response code
       500: {
-        description: "Error adding delivery location", // response desc.
+        description: "Error getting payment link", // response desc.
         content: {
           // content-type
           "application/json": {

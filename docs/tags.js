@@ -12,5 +12,8 @@ export default {
     {
       name: "Payment operations", // name of a tag
     },
+    {
+      name: "Admin operations", // name of a tag
+    },
   ],
 };

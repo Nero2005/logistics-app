@@ -1,20 +1,20 @@
 export default {
   get: {
     tags: ["User operations"], // operation's tag.
-    description: "Get Notifications", // operation's desc.
-    operationId: "getNotifications", // unique operation id
+    description: "Get Delivered Orders", // operation's desc.
+    operationId: "getDeliveredOrders", // unique operation id
     parameters: [],
     // expected responses
     responses: {
       // response code
       200: {
-        description: "Notifications found", // response desc.
+        description: "Orders found", // response desc.
         content: {
           // content-type
           "application/json": {
             schema: {
               type: "Array",
-              $ref: "#/components/schemas/NotificationUser", // user data model
+              $ref: "#/components/schemas/Order", // user data model
             },
           },
         },

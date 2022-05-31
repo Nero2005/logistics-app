@@ -132,6 +132,17 @@ const orderCtrl = {
       return res.status(500).json(err);
     }
   },
+  getOrder: async (req, res) => {
+    try {
+      const order = await Order.findOne({
+        order_id: req.body.order_id,
+      });
+      return res.status(200).json(order);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json(err);
+    }
+  },
   getPackages: async (req, res) => {
     try {
       const packages = await Package.find();
@@ -143,10 +154,10 @@ const orderCtrl = {
   },
   getPackage: async (req, res) => {
     try {
-      const packages = await Package.findOne({
+      const packageFound = await Package.findOne({
         package_id: req.body.package_id,
       });
-      return res.status(200).json(packages);
+      return res.status(200).json(packageFound);
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);
@@ -243,6 +254,18 @@ const orderCtrl = {
       return res.status(500).json(err);
     }
   },
+  deliveredOrder: async (req, res) => {
+    try {
+      const { order_id } = req.body;
+      const foundOrder = await Order.findOne({ order_id });
+      foundOrder.delivered = true;
+      await foundOrder.save();
+      return res.status(200).json({ message: "order delivered" });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json(err);
+    }
+  },
   incPackageQty: async (req, res) => {
     try {
       const { quantity, package_id } = req.body; // quantity to increase by
@@ -251,7 +274,9 @@ const orderCtrl = {
         { $inc: { quantity: quantity } },
         { new: true }
       );
-      return res.status(200).json(foundPackage);
+      return res
+        .status(200)
+        .json({ quantity: foundPackage.quantity, message: "successful" });
     } catch (err) {
       console.log(err);
       res.status(500).json(err);

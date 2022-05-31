@@ -8,7 +8,9 @@ import login from "./login.js";
 import logout from "./logout.js";
 import getRider from "./get-rider.js";
 import getPendingOrders from "./get-pending-orders.js";
+import getDeliveredOrders from "./get-delivered-orders.js";
 import getNotifications from "./get-notifications.js";
+
 export const riderPaths = {
   "/api/v1/riders/otp/phone": {
     ...sendOtp,
@@ -39,6 +41,9 @@ export const riderPaths = {
   },
   "/api/v1/riders/get_pending_orders": {
     ...getPendingOrders,
+  },
+  "/api/v1/riders/get_delivered_orders": {
+    ...getDeliveredOrders,
   },
   "/api/v1/riders/get_notifications": {
     ...getNotifications,

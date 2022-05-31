@@ -27,6 +27,10 @@ userRouter
   .get(authToken, userCtrl.getPendingOrders);
 
 userRouter
+  .route("/api/v1/users/get_delivered_orders")
+  .get(authToken, userCtrl.getDeliveredOrders);
+
+userRouter
   .route("/api/v1/users/get_notifications")
   .get(authToken, userCtrl.getNotifications);
 

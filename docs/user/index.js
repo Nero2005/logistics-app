@@ -8,7 +8,9 @@ import logoutUser from "./logout.js";
 import getRiders from "./get-riders.js";
 import getUser from "./get-user.js";
 import getPendingOrdersUser from "./get-pending-orders.js";
+import getDeliveredOrdersUser from "./get-delivered-orders.js";
 import getNotificationsUser from "./get-notifications.js";
+
 export const userPaths = {
   "/api/v1/users/otp/phone": {
     ...sendOtpUser,
@@ -39,6 +41,9 @@ export const userPaths = {
   },
   "/api/v1/users/get_pending_orders": {
     ...getPendingOrdersUser,
+  },
+  "/api/v1/users/get_delivered_orders": {
+    ...getDeliveredOrdersUser,
   },
   "/api/v1/users/get_notifications": {
     ...getNotificationsUser,

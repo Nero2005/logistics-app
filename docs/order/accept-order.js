@@ -1,20 +1,34 @@
 export default {
-  get: {
-    tags: ["User operations"], // operation's tag.
-    description: "Get Riders", // operation's desc.
-    operationId: "getRiders", // unique operation id
-    parameters: [],
+  post: {
+    tags: ["Order operations", "Rider operations"], // operation's tag.
+    description: "Accept New Order", // operation's desc.
+    operationId: "acceptOrder", // unique operation id
+    parameters: [
+      // expected params.
+      {
+        name: "order_id", // name of the param
+        in: "body", // location of the param
+        schema: {
+          type: "String",
+          example: "OO-27253",
+        },
+        required: true, // Mandatory param
+        description: "Order id", // param desc.
+      },
+    ],
     // expected responses
     responses: {
       // response code
       200: {
-        description: "Riders found", // response desc.
+        description: "Order accepted", // response desc.
         content: {
           // content-type
           "application/json": {
             schema: {
-              type: "Array",
-              $ref: "#/components/schemas/Rider", // user data model
+              message: {
+                type: "String",
+                example: "order accepted",
+              },
             },
           },
         },
@@ -31,8 +45,8 @@ export default {
         },
       },
       // response code
-      404: {
-        description: "Rider not found", // response desc.
+      500: {
+        description: "Error accepting order", // response desc.
         content: {
           // content-type
           "application/json": {

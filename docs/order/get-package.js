@@ -1,49 +1,31 @@
 export default {
-  post: {
-    tags: ["User operations"], // operation's tag.
-    description: "Set User Password", // operation's desc.
-    operationId: "setPassword", // unique operation id
+  get: {
+    tags: ["Order operations"], // operation's tag.
+    description: "Get Package", // operation's desc.
+    operationId: "getPackage", // unique operation id
     parameters: [
       // expected params.
       {
-        name: "password", // name of the param
+        name: "package_id", // name of the param
         in: "body", // location of the param
         schema: {
           type: "String",
-          example: "password",
+          example: "g3d4y5yur7",
         },
         required: true, // Mandatory param
-        description: "Password user provided", // param desc.
+        description: "Package id", // param desc.
       },
     ],
     // expected responses
     responses: {
       // response code
       200: {
-        description: "Password set successfully", // response desc.
+        description: "Package found", // response desc.
         content: {
           // content-type
           "application/json": {
             schema: {
-              message: {
-                type: "String",
-                example: "Password set successfully",
-              },
-            },
-          },
-        },
-      },
-      // response code
-      400: {
-        description: "Password already set", // response desc.
-        content: {
-          // content-type
-          "application/json": {
-            schema: {
-              Message: {
-                type: "String",
-                content: "You have already set the password",
-              },
+              $ref: "#/components/schemas/Package", // user data model
             },
           },
         },
@@ -59,8 +41,9 @@ export default {
           },
         },
       },
-      500: {
-        description: "Error setting password", // response desc.
+      // response code
+      404: {
+        description: "Package not found", // response desc.
         content: {
           // content-type
           "application/json": {

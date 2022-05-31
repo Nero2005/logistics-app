@@ -134,6 +134,46 @@ export default {
         },
       },
       // order model
+      Package: {
+        type: "Object", // data type
+        properties: {
+          _id: {
+            type: "String", // data-type
+            description: "Database auto generated package id", // desc
+            example: "6290b8a117bbcaf8b4df5788", // example
+          },
+          package_id: {
+            type: "String", // data-type
+            description: "Random unique package id", // desc
+            example: "OO-27253", // example
+          },
+          package_name: {
+            type: "String", // data-type
+            description: "Package name", // desc
+            example: "Package name", // example
+          },
+          description: {
+            type: "String", // data-type
+            description: "Package description", // desc
+            example: "Package description", // example
+          },
+          price: {
+            type: "Number", // data-type
+            description: "Package price", // desc
+            example: "10000", // example
+          },
+          quantity: {
+            type: "Number", // data-type
+            description: "Quantity of package available", // desc
+            example: "30", // example
+          },
+          pickup_location: {
+            type: "String",
+            description: "_id of the location of the package", // desc
+            example: "6290b8a117bbcaf8b4df5788", // example
+          },
+        },
+      },
       Order: {
         type: "Object", // data type
         properties: {
@@ -173,7 +213,6 @@ export default {
             description: "Time to deliver order", // desc
             example: "40m", // example
           },
-          //delivered: { type: Boolean, default: false },
           picked_up: {
             type: "Boolean", // data-type
             description: "The picked up status of the order", // desc

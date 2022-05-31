@@ -1,26 +1,29 @@
 export default {
   get: {
-    tags: ["User operations"], // operation's tag.
-    description: "Get Riders", // operation's desc.
-    operationId: "getRiders", // unique operation id
+    tags: ["User operations", "Payment operations"], // operation's tag.
+    description: "Get Wallet Balance", // operation's desc.
+    operationId: "getWalletBalance", // unique operation id
     parameters: [],
     // expected responses
     responses: {
       // response code
       200: {
-        description: "Riders found", // response desc.
+        description: "Wallet balance", // response desc.
         content: {
           // content-type
           "application/json": {
             schema: {
-              type: "Array",
-              $ref: "#/components/schemas/Rider", // user data model
+              balance: {
+                type: "Number",
+                description: "Wallet balance",
+                example: "15000",
+              },
             },
           },
         },
       },
       401: {
-        description: "Rider not authenticated", // response desc.
+        description: "User not authenticated", // response desc.
         content: {
           // content-type
           "application/json": {
@@ -32,7 +35,7 @@ export default {
       },
       // response code
       404: {
-        description: "Rider not found", // response desc.
+        description: "Wallet not found", // response desc.
         content: {
           // content-type
           "application/json": {
