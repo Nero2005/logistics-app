@@ -1,8 +1,8 @@
 export default {
   post: {
-    tags: ["Rider operations"], // operation's tag.
-    description: "Add Rider Delivery Location", // operation's desc.
-    operationId: "addPDeliveryLocation", // unique operation id
+    tags: ["Admin operations"], // operation's tag.
+    description: "Add Rider", // operation's desc.
+    operationId: "addRider", // unique operation id
     parameters: [
       // expected params.
     ],
@@ -10,7 +10,7 @@ export default {
       content: {
         "application/json": {
           schema: {
-            $ref: "#/components/schemas/LocationInput",
+            $ref: "#/components/schemas/RiderInput",
           },
         },
         // param desc.
@@ -19,8 +19,8 @@ export default {
     // expected responses
     responses: {
       // response code
-      200: {
-        description: "Delivery Location added successfully", // response desc.
+      201: {
+        description: "Rider added successfully", // response desc.
         content: {
           // content-type
           "application/json": {
@@ -31,7 +31,7 @@ export default {
         },
       },
       401: {
-        description: "Rider not authenticated", // response desc.
+        description: "Admin not authenticated", // response desc.
         content: {
           // content-type
           "application/json": {
@@ -41,9 +41,20 @@ export default {
           },
         },
       },
+      404: {
+        description: "Rider not found", // response desc.
+        content: {
+          // content-type
+          "application/json": {
+            schema: {
+              $ref: "#/components/schemas/Error", // error data model
+            },
+          },
+        },
+      },
       // response code
       500: {
-        description: "Error adding delivery location", // response desc.
+        description: "Error removing rider", // response desc.
         content: {
           // content-type
           "application/json": {

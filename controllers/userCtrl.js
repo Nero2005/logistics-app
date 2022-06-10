@@ -65,19 +65,19 @@ const userCtrl = {
 
       await foundUser.save();
 
-      const response = await fetch(
-        `${process.env.SERVER_HOST}/api/v1/users/otp/email`,
-        {
-          method: "POST",
-          body: JSON.stringify({ email }),
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      const result = await response.json();
+      // const response = await fetch(
+      //   `${process.env.SERVER_HOST}/api/v1/users/otp/email`,
+      //   {
+      //     method: "POST",
+      //     body: JSON.stringify({ email }),
+      //     headers: { "Content-Type": "application/json" },
+      //   }
+      // );
+      // const result = await response.json();
 
       res.status(200).json({
         message: "Personal Info added successfully",
-        ...result,
+        // ...result,
       });
     } catch (err) {
       console.log(err);
@@ -128,14 +128,16 @@ const userCtrl = {
         process.env.JWT_SECRET,
         { expiresIn: "3d" }
       );
-      res.cookie("userToken", accessToken, {
-        maxAge: 3 * 24 * 60 * 60 * 1000,
-        httpOnly: true,
-      });
       // const { password, ...others } = user._doc;
       if (psw !== req.body.password)
         res.status(401).json({ message: "Wrong password" });
-      else res.status(200).json({ accessToken });
+      else {
+        res.cookie("userToken", accessToken, {
+          maxAge: 3 * 24 * 60 * 60 * 1000,
+          httpOnly: true,
+        });
+        return res.status(200).json({ accessToken });
+      }
     } catch (e) {
       console.log(e);
       res.status(500).json(e);
