@@ -471,6 +471,7 @@ const otpCtrl = {
                   phone_number: foundNumber._id,
                 });
                 foundRider.otp_verified = true;
+                foundRider.company_id = null;
                 await foundRider.save();
                 accessToken = jwt.sign(
                   {
